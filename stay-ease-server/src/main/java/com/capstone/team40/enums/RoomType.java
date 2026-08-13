@@ -1,4 +1,4 @@
-package com.capstone.team40.model;
+package com.capstone.team40.enums;
 
 public enum RoomType
 {

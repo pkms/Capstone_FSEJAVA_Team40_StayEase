@@ -1,5 +1,6 @@
 package com.capstone.team40.model;
 
+import com.capstone.team40.enums.RoomType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

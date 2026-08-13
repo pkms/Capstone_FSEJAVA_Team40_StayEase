@@ -28,10 +28,8 @@ public class Hotel
     private String description;
     @Column(name="COVER_IMAGE_URL")
     private String coverImageUrl;
-
     @Column(name="MANAGER_ID")
     private UUID managerId;
-
     @Column(name="CREATED_AT")
     private LocalDateTime createdAt;
 }
