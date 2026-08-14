@@ -24,4 +24,6 @@ public class Booking
     private LocalDateTime checkInDate;
     @Column(name="CHECKOUT_DATE")
     private LocalDateTime checkOutDate;
+    @Column(name="CREATED_BY")
+    private String createdBy;
 }

@@ -27,7 +27,17 @@ public class ConvertUtils
 
     public static List<RoomResponse> toRoomResponse(List<Room> roomList)
     {
-        return roomList.stream().map(room -> new RoomResponse(room.getId(), room.getHotelId(), room.getRoomType(), room.getPricePerNight(), room.getMaxOccupancy()))
+        return roomList.stream().map(room -> new RoomResponse(room.getId(), room.getHotelId(), room.getRoomNumber(), room.getRoomType(), room.getPricePerNight(), room.getMaxOccupancy()))
                 .collect(Collectors.toList());
+    }
+
+    public static Booking toBooking(CreateBookingRequest createBookingRequest)
+    {
+        Booking booking = new Booking();
+        booking.setRoomId(createBookingRequest.roomId());
+        booking.setCheckInDate(createBookingRequest.checkInDate());
+        booking.setCheckOutDate(createBookingRequest.checkOutDate());
+        booking.setCreatedBy(createBookingRequest.createdBy());
+        return booking;
     }
 }

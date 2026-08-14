@@ -26,6 +26,7 @@ public class User
     @Column(name="PASSWORD_HASH")
     private String passwordHash;
     @Column(name="ROLE")
+    @Enumerated(EnumType.STRING)
     private Role role;
     @Column(name="CREATED_AT")
     private LocalDateTime createdAt;

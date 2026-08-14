@@ -7,6 +7,7 @@ import com.capstone.team40.model.RoomResponse;
 import com.capstone.team40.repository.HotelRepository;
 import com.capstone.team40.utils.ConvertUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+@Component
 public class HotelService
 {
     @Autowired

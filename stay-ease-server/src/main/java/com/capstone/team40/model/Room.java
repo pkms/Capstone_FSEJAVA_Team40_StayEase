@@ -21,7 +21,10 @@ public class Room
     private UUID id;
     @Column(name="HOTEL_ID")
     private UUID hotelId;
+    @Column(name="ROOM_NUMBER")
+    private int roomNumber;
     @Column(name="ROOM_TYPE")
+    @Enumerated(EnumType.STRING)
     private RoomType roomType;
     @Column(name="PRICE_PER_NIGHT")
     private double pricePerNight;
