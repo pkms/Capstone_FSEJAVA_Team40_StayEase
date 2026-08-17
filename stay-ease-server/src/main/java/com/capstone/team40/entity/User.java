@@ -1,4 +1,4 @@
-package com.capstone.team40.model;
+package com.capstone.team40.entity;
 
 import com.capstone.team40.enums.Role;
 import jakarta.persistence.*;
@@ -9,10 +9,11 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name="USERS")
 @Setter
 @Getter
 @NoArgsConstructor
+@Entity
+@Table(name="USERS")
 public class User
 {
     @Id

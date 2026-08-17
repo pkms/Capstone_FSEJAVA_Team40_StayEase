@@ -1,8 +1,8 @@
 package com.capstone.team40.service;
 
-import com.capstone.team40.model.Booking;
+import com.capstone.team40.entity.Booking;
 import com.capstone.team40.model.HotelResponse;
-import com.capstone.team40.model.Room;
+import com.capstone.team40.entity.Room;
 import com.capstone.team40.model.RoomResponse;
 import com.capstone.team40.repository.HotelRepository;
 import com.capstone.team40.utils.ConvertUtils;

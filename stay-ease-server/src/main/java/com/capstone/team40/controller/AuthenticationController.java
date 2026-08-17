@@ -2,6 +2,7 @@ package com.capstone.team40.controller;
 
 import com.capstone.team40.model.CreateUserRequest;
 import com.capstone.team40.model.LoginRequest;
+import com.capstone.team40.service.JwtService;
 import com.capstone.team40.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ public class AuthenticationController
 {
     @Autowired
     private UserService userService;
+    @Autowired
+    private JwtService jwtService;
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody CreateUserRequest createUserRequest)
@@ -29,7 +32,7 @@ public class AuthenticationController
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest)
     {
-        return this.userService.login(loginRequest) ? ResponseEntity.ok().body("Login Successful !") : ResponseEntity.badRequest().body("User does not exists in the system or password did not match");
+        return this.userService.login(loginRequest) ? ResponseEntity.ok().body(this.jwtService.generateToken(loginRequest.email())) : ResponseEntity.badRequest().body("User does not exists in the system or password did not match");
     }
 
     @PostMapping("/logout")

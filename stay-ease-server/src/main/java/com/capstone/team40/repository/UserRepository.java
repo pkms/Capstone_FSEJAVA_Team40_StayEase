@@ -1,6 +1,6 @@
 package com.capstone.team40.repository;
 
-import com.capstone.team40.model.User;
+import com.capstone.team40.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

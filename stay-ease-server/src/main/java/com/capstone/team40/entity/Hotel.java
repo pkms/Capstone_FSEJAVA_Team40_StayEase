@@ -1,4 +1,4 @@
-package com.capstone.team40.model;
+package com.capstone.team40.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -8,10 +8,11 @@ import lombok.Setter;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Entity(name="HOTEL")
 @Setter
 @Getter
 @NoArgsConstructor
+@Entity
+@Table(name="HOTEL")
 public class Hotel
 {
     @Id

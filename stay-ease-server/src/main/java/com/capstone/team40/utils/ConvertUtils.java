@@ -1,7 +1,12 @@
 package com.capstone.team40.utils;
 
+import com.capstone.team40.entity.Booking;
+import com.capstone.team40.entity.Hotel;
+import com.capstone.team40.entity.Room;
+import com.capstone.team40.entity.User;
 import com.capstone.team40.enums.Role;
 import com.capstone.team40.model.*;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
@@ -31,6 +36,16 @@ public class ConvertUtils
                 .collect(Collectors.toList());
     }
 
+    public static RoomResponse toRoomResponse(Room room)
+    {
+        return new RoomResponse(room.getId(), room.getHotelId(), room.getRoomNumber(), room.getRoomType(), room.getPricePerNight(), room.getMaxOccupancy());
+    }
+
+    public static UserResponse toUserResponse(User user)
+    {
+        return new UserResponse(user.getEmail(), new SimpleGrantedAuthority(user.getRole().name()));
+    }
+
     public static Booking toBooking(CreateBookingRequest createBookingRequest)
     {
         Booking booking = new Booking();
@@ -39,5 +54,10 @@ public class ConvertUtils
         booking.setCheckOutDate(createBookingRequest.checkOutDate());
         booking.setCreatedBy(createBookingRequest.createdBy());
         return booking;
+    }
+
+    public static BookingResponse toBookingResponse(Booking booking, Room room)
+    {
+        return new BookingResponse(booking.getId(), toRoomResponse(room), booking.getCheckInDate(), booking.getCheckOutDate(), booking.getBookingStatus());
     }
 }

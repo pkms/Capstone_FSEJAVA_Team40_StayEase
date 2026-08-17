@@ -1,7 +1,7 @@
 INSERT INTO USERS(ID,EMAIL,PASSWORD_HASH,ROLE,NAME,CREATED_AT)
-VALUES (RANDOM_UUID(),'admin@stayease.com','$2a$10$hash','ADMIN','Admin',CURRENT_TIMESTAMP()),
-(RANDOM_UUID(),'mgr1@stayease.com','$2a$10$hash','MANAGER','Hotel Manager',CURRENT_TIMESTAMP()),
-(RANDOM_UUID(),'guest1@stayease.com','$2a$10$hash','GUEST','Rohit Verma',CURRENT_TIMESTAMP());
+VALUES (RANDOM_UUID(),'admin@stayease.com','$2a$10$U1E/jEt3fvDiv3SNeyPLVuthzVU.G8qQoL3dXabaE0CZkNd0GMpZe','ADMIN','Admin',CURRENT_TIMESTAMP()),
+(RANDOM_UUID(),'mgr1@stayease.com','$2a$10$U1E/jEt3fvDiv3SNeyPLVuthzVU.G8qQoL3dXabaE0CZkNd0GMpZe','MANAGER','Hotel Manager',CURRENT_TIMESTAMP()),
+(RANDOM_UUID(),'guest1@stayease.com','$2a$10$U1E/jEt3fvDiv3SNeyPLVuthzVU.G8qQoL3dXabaE0CZkNd0GMpZe','GUEST','Rohit Verma',CURRENT_TIMESTAMP());
 
 
 INSERT INTO HOTEL(ID,NAME,CITY,STAR_RATING,DESCRIPTION,COVER_IMAGE_URL,MANAGER_ID,CREATED_AT)
