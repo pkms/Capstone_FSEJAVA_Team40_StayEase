@@ -26,24 +26,21 @@ export default function SearchForm({ onSearch, initialCity = '', initialCheckIn 
     <form className="search-form" onSubmit={submit}>
       <div className="row">
         <label>
-          City
-          <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="City (e.g. Goa)" />
+          <span className="field-label">Destination</span>
+          <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="e.g. Goa" />
         </label>
         <label>
-          Check-in
+          <span className="field-label">Check-in</span>
           <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} />
         </label>
         <label>
-          Check-out
+          <span className="field-label">Check-out</span>
           <input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
         </label>
+        <button className="primary-button" type="submit">Search Hotels</button>
       </div>
 
       {error && <div className="form-error">{error}</div>}
-
-      <div className="row actions">
-        <button className="primary-button" type="submit">Search Hotels</button>
-      </div>
     </form>
   );
 }

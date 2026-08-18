@@ -50,7 +50,7 @@ export default function MyStays({ navigate }: { navigate: (hash: string) => void
               <td>{b.checkInDate}</td>
               <td>{b.checkOutDate}</td>
               <td>₹{b.totalPrice}</td>
-              <td>{b.status}</td>
+              <td><span className={`status-badge ${b.status.toLowerCase()}`}>{b.status}</span></td>
               <td>{b.status !== 'CANCELLED' && <button className="small-button" onClick={() => doCancel(b.id)}>Cancel</button>}</td>
             </tr>
           ))}
