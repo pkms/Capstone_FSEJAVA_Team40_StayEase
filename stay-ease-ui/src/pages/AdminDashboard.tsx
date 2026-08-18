@@ -155,7 +155,7 @@ export default function AdminDashboard() {
           </thead>
           <tbody>
             {bookings.map((b) => (
-              <tr key={b.id}><td>{b.bookingRef}</td><td>{b.userId}</td><td>{b.hotelId}</td><td>{b.roomId}</td><td>{b.checkInDate}</td><td>{b.checkOutDate}</td><td>{b.status}</td></tr>
+              <tr key={b.id}><td>{b.bookingRef}</td><td>{b.userId}</td><td>{b.hotelId}</td><td>{b.roomId}</td><td>{b.checkInDate}</td><td>{b.checkOutDate}</td><td><span className={`status-badge ${b.status.toLowerCase()}`}>{b.status}</span></td></tr>
             ))}
           </tbody>
         </table>

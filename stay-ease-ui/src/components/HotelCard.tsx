@@ -8,23 +8,43 @@ interface Props {
   onView: (hotelId: string) => void;
 }
 
+function Stars({ rating }: { rating: number }) {
+  const full = Math.round(rating);
+  return (
+    <span className="stars" aria-label={`${rating} star rating`}>
+      {Array.from({ length: 5 }).map((_, i) => (
+        <span key={i} className={i < full ? 'star star--filled' : 'star'} aria-hidden="true">★</span>
+      ))}
+    </span>
+  );
+}
+
 export default function HotelCard({ hotel, priceFrom, onView }: Props) {
   return (
     <article className="hotel-card">
-      <img
-        src={hotel.coverImageUrl || defaultImage}
-        alt={hotel.name}
-        className="hotel-cover"
-        onError={(e) => { (e.currentTarget as HTMLImageElement).src = defaultImage; }}
-      />
+      <div className="hotel-image-wrap">
+        <img
+          src={hotel.coverImageUrl || defaultImage}
+          alt={hotel.name}
+          className="hotel-cover"
+          onError={(e) => { (e.currentTarget as HTMLImageElement).src = defaultImage; }}
+        />
+        <span className="hotel-badge">{hotel.city}</span>
+      </div>
+
       <div className="hotel-body">
-        <h3>{hotel.name}</h3>
-        <div className="meta">{hotel.city} • {hotel.starRating}★</div>
-        <p className="desc">{hotel.description}</p>
-        <div className="row footer">
-          <div className="price">From ₹{priceFrom ?? '—'}/night</div>
-          <button className="small-button" onClick={() => onView(hotel.id)}>View Rooms</button>
+        <div className="hotel-heading">
+          <h3>{hotel.name}</h3>
+          <Stars rating={hotel.starRating} />
         </div>
+        <p className="desc">{hotel.description}</p>
+      </div>
+
+      <div className="hotel-stub">
+        <span className="stub-label">Rate from</span>
+        <div className="price">₹{priceFrom ?? '—'}</div>
+        <span className="stub-sub">per night</span>
+        <button className="small-button" onClick={() => onView(hotel.id)}>View Rooms</button>
       </div>
     </article>
   );
