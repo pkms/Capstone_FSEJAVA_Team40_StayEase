@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700" role="img" aria-label="Admin dashboard preview">
+  <rect width="100%" height="100%" fill="#0f172a" />
+  <g transform="translate(40,40)">
+    <rect x="0" y="0" width="320" height="620" rx="12" fill="#0b1220" />
+    <text x="28" y="48" fill="#fff" font-family="Segoe UI, Roboto, Arial" font-size="22">Admin</text>
+
+    <rect x="360" y="20" width="780" height="100" rx="10" fill="#111827" opacity="0.9" />
+    <text x="400" y="80" fill="#fff" font-family="Segoe UI, Roboto, Arial" font-size="28">Dashboard — Site metrics</text>
+
+    <g transform="translate(360,140)">
+      <rect x="0" y="0" width="240" height="160" rx="8" fill="#1f2937" />
+      <text x="20" y="36" fill="#fff" font-size="20">Total Users</text>
+      <text x="20" y="80" fill="#34d399" font-size="28">1,024</text>
+    </g>
+
+    <g transform="translate(620,140)">
+      <rect x="0" y="0" width="240" height="160" rx="8" fill="#1f2937" />
+      <text x="20" y="36" fill="#fff" font-size="20">Bookings</text>
+      <text x="20" y="80" fill="#60a5fa" font-size="28">3,482</text>
+    </g>
+
+    <g transform="translate(360,320)">
+      <rect x="0" y="0" width="1040" height="280" rx="8" fill="#0b1220" />
+      <text x="20" y="36" fill="#fff" font-size="20">Recent activity</text>
+    </g>
+  </g>
+</svg>
