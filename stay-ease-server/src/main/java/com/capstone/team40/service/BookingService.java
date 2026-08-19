@@ -31,7 +31,7 @@ public class BookingService
 
     public List<Booking> getBookingDetails(Set<UUID> roomIds)
     {
-        return this.bookingRepository.findByRoomIdIn(roomIds);
+        return this.bookingRepository.findByRoomIdIn(roomIds).stream().filter(booking -> "COMPLETED".equals(booking.getBookingStatus().name())).collect(Collectors.toList());
     }
 
     public boolean isRoomAvailable(UUID roomId, LocalDateTime checkInDate, LocalDateTime checkOutDate)
@@ -75,6 +75,7 @@ public class BookingService
         if(booking != null)
         {
             booking.setBookingStatus(BookingStatus.CANCELLED);
+            this.bookingRepository.save(booking);
         }
         return booking;
     }
