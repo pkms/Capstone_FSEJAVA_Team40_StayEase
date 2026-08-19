@@ -20,9 +20,18 @@ public class BookingController
     private BookingService bookingService;
 
     @PostMapping("/create")
-    public ResponseEntity<UUID> createBooking(@RequestBody CreateBookingRequest createBookingRequest)
+    public ResponseEntity<String> createBooking(@RequestBody CreateBookingRequest createBookingRequest)
     {
-        return ResponseEntity.ok().body(this.bookingService.createBooking(createBookingRequest));
+        Booking booking = null;
+        try
+        {
+            booking = this.bookingService.createBooking(createBookingRequest);
+        }
+        catch (Exception exception)
+        {
+            return ResponseEntity.badRequest().body(exception.getMessage());
+        }
+        return ResponseEntity.ok().body("Room successfully booked with Booking ID - " +booking.getId());
     }
 
     @GetMapping("/mine")
@@ -35,7 +44,8 @@ public class BookingController
     @PutMapping("/{id}/cancel")
     public ResponseEntity<String> cancelBooking(@RequestParam("id") UUID bookingId)
     {
-        Booking booking = this.bookingService.cancelBooking(bookingId);
+        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
+        Booking booking = this.bookingService.cancelBooking(bookingId, userName);
         return booking != null ? ResponseEntity.ok().body("Booking cancelled successfully.") :
                 ResponseEntity.badRequest().body("Booking does not exists !");
     }

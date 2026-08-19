@@ -9,6 +9,7 @@ import com.capstone.team40.model.*;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,7 +27,7 @@ public class ConvertUtils
 
     public static List<HotelResponse> toHotelResponse(List<Hotel> hotelList)
     {
-        return hotelList.stream().map(hotel -> new HotelResponse(hotel.getId(), hotel.getName(), hotel.getCity(), hotel.getStarRating(), hotel.getDescription(), hotel.getCoverImageUrl()))
+        return hotelList.stream().map(hotel -> new HotelResponse(hotel.getId(), hotel.getName(), hotel.getCity(), hotel.getStarRating(), hotel.getDescription(), hotel.getCoverImageUrl(), hotel.getManagerId()))
                .collect(Collectors.toList());
     }
 
@@ -52,12 +53,24 @@ public class ConvertUtils
         booking.setRoomId(createBookingRequest.roomId());
         booking.setCheckInDate(createBookingRequest.checkInDate());
         booking.setCheckOutDate(createBookingRequest.checkOutDate());
-        booking.setCreatedBy(createBookingRequest.createdBy());
         return booking;
     }
 
     public static BookingResponse toBookingResponse(Booking booking, Room room)
     {
         return new BookingResponse(booking.getId(), toRoomResponse(room), booking.getCheckInDate(), booking.getCheckOutDate(), booking.getBookingStatus());
+    }
+
+    public static Hotel toHotel(CreateHotelRequest createHotelRequest)
+    {
+        Hotel hotel = new Hotel();
+        hotel.setCity(createHotelRequest.city());
+        hotel.setName(createHotelRequest.name());
+        hotel.setDescription(createHotelRequest.description());
+        hotel.setStarRating(createHotelRequest.starRating());
+        hotel.setCoverImageUrl(createHotelRequest.coverImageUrl());
+        hotel.setManagerId(createHotelRequest.managerId());
+        hotel.setCreatedAt(LocalDateTime.now());
+        return hotel;
     }
 }

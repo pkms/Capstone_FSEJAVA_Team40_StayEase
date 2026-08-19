@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -29,12 +30,19 @@ public class SecurityConfiguration
                                 "/api/auth/register",
                                 "/api/auth/login"
                         ).permitAll()
-                        .requestMatchers("/api/hotels")
-                        .hasAuthority("GUEST")
+                        .requestMatchers("/api/hotels/create","/api/hotels/{id}/update")
+                        .hasAuthority("ADMIN")
+                        .requestMatchers("/api/hotels/{id}/createRoom","/api/rooms/**")
+                        .hasAuthority("MANAGER")
                         .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtTokenAuthorizationOncePerRequestFilter, UsernamePasswordAuthenticationFilter.class)
+                .logout(logout -> logout
+                        .logoutUrl("/api/auth/logout") // Define logout endpoint
+                        .logoutSuccessHandler((request, response, authentication) ->
+                                SecurityContextHolder.clearContext() // Fallback context clearing
+                        )
                 );
-
-        http.addFilterBefore(jwtTokenAuthorizationOncePerRequestFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

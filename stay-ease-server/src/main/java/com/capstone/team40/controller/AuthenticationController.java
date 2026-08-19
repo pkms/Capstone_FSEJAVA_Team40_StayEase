@@ -4,6 +4,7 @@ import com.capstone.team40.model.CreateUserRequest;
 import com.capstone.team40.model.LoginRequest;
 import com.capstone.team40.service.JwtService;
 import com.capstone.team40.service.UserService;
+import jakarta.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -23,20 +24,20 @@ public class AuthenticationController
     private JwtService jwtService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody CreateUserRequest createUserRequest)
+    public ResponseEntity<String> registerUser(@Valid @RequestBody CreateUserRequest createUserRequest)
     {
         return this.userService.registerUser(createUserRequest) ? ResponseEntity.status(HttpStatus.CREATED).body("User Registered Successfully !") :
                 ResponseEntity.badRequest().body("User already exists in the system ! Try a different Email ID");
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest loginRequest)
+    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest)
     {
-        return this.userService.login(loginRequest) ? ResponseEntity.ok().body(this.jwtService.generateToken(loginRequest.email())) : ResponseEntity.badRequest().body("User does not exists in the system or password did not match");
+        return this.userService.login(loginRequest) ? ResponseEntity.ok().body("Bearer " + this.jwtService.generateToken(loginRequest.email())) : ResponseEntity.badRequest().body("User does not exists in the system or password did not match");
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(@RequestBody LoginRequest loginRequest)
+    public ResponseEntity<String> logout(@Valid @RequestBody LoginRequest loginRequest)
     {
         return StringUtils.isNotBlank(loginRequest.email()) && StringUtils.isNotBlank(loginRequest.password()) ? ResponseEntity.status(HttpStatus.NO_CONTENT).body("Logout Successful !") : ResponseEntity.badRequest().body("User did not login to the System");
     }

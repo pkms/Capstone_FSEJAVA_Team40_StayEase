@@ -1,9 +1,9 @@
 package com.capstone.team40.service;
 
 import com.capstone.team40.entity.Booking;
-import com.capstone.team40.model.HotelResponse;
+import com.capstone.team40.entity.Hotel;
+import com.capstone.team40.model.*;
 import com.capstone.team40.entity.Room;
-import com.capstone.team40.model.RoomResponse;
 import com.capstone.team40.repository.HotelRepository;
 import com.capstone.team40.utils.ConvertUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,5 +47,48 @@ public class HotelService
                 .collect(Collectors.toList());
 
         return ConvertUtils.toRoomResponse(availableRooms);
+    }
+
+    public Hotel createHotel(CreateHotelRequest createHotelRequest)
+    {
+        return this.hotelRepository.save(ConvertUtils.toHotel(createHotelRequest));
+    }
+
+    public Hotel updateHotel(UpdateHotelRequest updateHotelRequest, UUID id)
+    {
+        Hotel hotelToUpdate = this.hotelRepository.findById(id).orElse(null);
+        if(hotelToUpdate != null)
+        {
+            hotelToUpdate.setName(updateHotelRequest.name());
+            hotelToUpdate.setCity(updateHotelRequest.city());
+            hotelToUpdate.setDescription(updateHotelRequest.description());
+            hotelToUpdate.setCoverImageUrl(updateHotelRequest.coverImageUrl());
+            hotelToUpdate = this.hotelRepository.save(hotelToUpdate);
+        }
+        return hotelToUpdate;
+    }
+
+    public void deleteHotel(UUID id)
+    {
+        this.hotelRepository.deleteById(id);
+    }
+
+    public Room createRoomInHotel(UUID id, CreateRoomRequest createRoomRequest)
+    {
+        Hotel hotel = this.hotelRepository.findById(id).orElse(null);
+        Room room = null;
+        if(hotel != null)
+        {
+            room = new Room();
+            room.setCreatedAt(LocalDateTime.now());
+            room.setHotelId(id);
+            room.setRoomNumber(createRoomRequest.roomNumber());
+            room.setRoomType(createRoomRequest.roomType());
+            room.setMaxOccupancy(createRoomRequest.maxOccupancy());
+            room.setPricePerNight(createRoomRequest.pricePerNight());
+            room.setActive(true);
+            room = this.roomService.addRoom(room);
+        }
+        return room;
     }
 }
