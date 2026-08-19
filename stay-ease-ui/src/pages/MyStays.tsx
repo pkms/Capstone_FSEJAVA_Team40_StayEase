@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { getBookingsForUser, cancelBooking } from '../api/mockApi';
 import type { Booking } from '../types';
 import { useToast } from '../contexts/ToastContext';
+import { strings } from '../constants/strings';
 
 export default function MyStays({ navigate }: { navigate: (hash: string) => void }) {
   const { user } = useAuth();
@@ -13,7 +14,7 @@ export default function MyStays({ navigate }: { navigate: (hash: string) => void
 
   useEffect(() => {
     if (!user) {
-      show('Please login to view your stays', 'warning');
+      show(strings.myStays.pleaseLogin, 'warning');
       // include current hash as redirect so user returns after login
       return navigate(`#/login?redirect=${encodeURIComponent(window.location.hash)}`);
     }
@@ -27,7 +28,7 @@ export default function MyStays({ navigate }: { navigate: (hash: string) => void
       await cancelBooking(id, user.id);
       setBookings((s) => s.map((bk) => (bk.id === id ? { ...bk, status: 'CANCELLED' } : bk)));
     } catch (e: any) {
-      setError(e.message || 'Cancel failed');
+      setError(e.message || strings.myStays.cancelFailed);
     }
   };
 
@@ -35,12 +36,12 @@ export default function MyStays({ navigate }: { navigate: (hash: string) => void
 
   return (
     <div className="page my-stays card">
-      <h2>My Stays</h2>
-      {loading && <div>Loading…</div>}
+      <h2>{strings.myStays.title}</h2>
+      {loading && <div>{strings.myStays.loading}</div>}
       {error && <div className="form-error">{error}</div>}
       <table className="stays-table">
         <thead>
-          <tr><th>Hotel</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Total</th><th>Status</th><th></th></tr>
+          <tr><th>{strings.myStays.hotel}</th><th>{strings.myStays.room}</th><th>{strings.myStays.checkIn}</th><th>{strings.myStays.checkOut}</th><th>{strings.myStays.total}</th><th>{strings.myStays.status}</th><th></th></tr>
         </thead>
         <tbody>
           {bookings.map((b) => (
@@ -51,7 +52,7 @@ export default function MyStays({ navigate }: { navigate: (hash: string) => void
               <td>{b.checkOutDate}</td>
               <td>₹{b.totalPrice}</td>
               <td><span className={`status-badge ${b.status.toLowerCase()}`}>{b.status}</span></td>
-              <td>{b.status !== 'CANCELLED' && <button className="small-button" onClick={() => doCancel(b.id)}>Cancel</button>}</td>
+              <td>{b.status !== 'CANCELLED' && <button className="small-button" onClick={() => doCancel(b.id)}>{strings.myStays.cancel}</button>}</td>
             </tr>
           ))}
         </tbody>

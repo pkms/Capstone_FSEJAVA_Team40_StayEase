@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { listRoomsForManager, listUpcomingBookingsForManager } from '../api/mockApi';
 import type { Room, Booking } from '../types';
 import { useToast } from '../contexts/ToastContext';
+import { strings } from '../constants/strings';
 
 export default function ManagerDashboard() {
   const { user } = useAuth();
@@ -13,7 +14,7 @@ export default function ManagerDashboard() {
   useEffect(() => {
     if (!user) return;
     if (user.role !== 'MANAGER') {
-      show('Access denied: manager only', 'error');
+      show(strings.manager.accessDenied, 'error');
       // redirect to home
       window.location.hash = '#/';
       return;
@@ -26,23 +27,23 @@ export default function ManagerDashboard() {
 
   return (
     <div className="page manager card">
-      <h2>Manager Dashboard</h2>
+      <h2>{strings.manager.title}</h2>
       <section>
-        <h3>My Rooms</h3>
+        <h3>{strings.manager.myRooms}</h3>
         <table>
-          <thead><tr><th>Number</th><th>Type</th><th>Price</th><th>Active</th></tr></thead>
+          <thead><tr><th>{strings.manager.number}</th><th>{strings.manager.type}</th><th>{strings.manager.price}</th><th>{strings.manager.active}</th></tr></thead>
           <tbody>
             {rooms.map((r) => (
-              <tr key={r.id}><td>{r.roomNumber}</td><td>{r.roomType}</td><td>₹{r.pricePerNight}</td><td>{r.isActive ? 'Yes' : 'No'}</td></tr>
+              <tr key={r.id}><td>{r.roomNumber}</td><td>{r.roomType}</td><td>₹{r.pricePerNight}</td><td>{r.isActive ? strings.manager.yes : strings.manager.no}</td></tr>
             ))}
           </tbody>
         </table>
       </section>
 
       <section>
-        <h3>Upcoming Bookings</h3>
+        <h3>{strings.manager.upcomingBookings}</h3>
         <table>
-          <thead><tr><th>Booking</th><th>Room</th><th>Check-in</th><th>Check-out</th></tr></thead>
+          <thead><tr><th>{strings.manager.booking}</th><th>{strings.manager.room}</th><th>{strings.manager.checkIn}</th><th>{strings.manager.checkOut}</th></tr></thead>
           <tbody>
             {bookings.map((b) => (
               <tr key={b.id}><td>{b.bookingRef}</td><td>{b.roomId}</td><td>{b.checkInDate}</td><td>{b.checkOutDate}</td></tr>

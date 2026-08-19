@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createBooking, getHotelById } from '../api/mockApi';
 import { useAuth } from '../contexts/AuthContext';
 import type { Hotel } from '../types';
 import { useToast } from '../contexts/ToastContext';
+import { strings } from '../constants/strings';
 
 export default function BookingPage({ query, navigate }: { query: URLSearchParams; navigate: (hash: string) => void }) {
   const { user } = useAuth();
@@ -25,43 +26,43 @@ export default function BookingPage({ query, navigate }: { query: URLSearchParam
   const confirm = async () => {
     setError('');
     if (!user) {
-      show('Please login to confirm booking', 'warning');
+      show(strings.booking.pleaseLogin, 'warning');
       return navigate(`#/login?redirect=${encodeURIComponent(window.location.hash)}`);
     }
     setLoading(true);
     try {
       const b = await createBooking(user.id, hotelId, roomId, checkIn, checkOut);
       setBookingRef(b.bookingRef);
-      show('Booking confirmed', 'success');
+      show(strings.booking.bookingSuccess, 'success');
     } catch (e: any) {
-      setError(e.message || 'Booking failed');
-      show(e.message || 'Booking failed', 'error');
+      setError(e.message || strings.booking.bookingFailed);
+      show(e.message || strings.booking.bookingFailed, 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  if (!hotel) return <div>Loading hotel…</div>;
+  if (!hotel) return <div>{strings.booking.loadingHotel}</div>;
 
   return (
     <div className="page booking card">
-      <h2>Confirm Booking</h2>
+      <h2>{strings.booking.title}</h2>
       <div>
-        <div><strong>Hotel:</strong> {hotel.name}</div>
-        <div><strong>Check-in:</strong> {checkIn}</div>
-        <div><strong>Check-out:</strong> {checkOut}</div>
+        <div><strong>{strings.booking.hotel}</strong> {hotel.name}</div>
+        <div><strong>{strings.booking.checkIn}</strong> {checkIn}</div>
+        <div><strong>{strings.booking.checkOut}</strong> {checkOut}</div>
       </div>
 
       {bookingRef ? (
         <div className="success">
-          <h3>Booking Confirmed</h3>
-          <div>Booking ID: <strong>{bookingRef}</strong></div>
-          <div><button className="primary-button" onClick={() => navigate('#/mystays')}>View My Stays</button></div>
+          <h3>{strings.booking.bookingConfirmed}</h3>
+          <div>{strings.booking.bookingId} <strong>{bookingRef}</strong></div>
+          <div><button className="primary-button" onClick={() => navigate('#/mystays')}>{strings.booking.viewMyStays}</button></div>
         </div>
       ) : (
         <div className="actions">
           {error && <div className="form-error">{error}</div>}
-          <button className="primary-button" onClick={confirm} disabled={loading}>{loading ? 'Booking…' : 'Confirm Booking'}</button>
+          <button className="primary-button" onClick={confirm} disabled={loading}>{loading ? strings.booking.bookingLoading : strings.booking.confirmBooking}</button>
         </div>
       )}
     </div>

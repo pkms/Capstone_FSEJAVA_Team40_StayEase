@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import * as api from '../api/mockApi';
 import type { User, Role } from '../types';
 

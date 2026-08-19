@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { strings } from '../constants/strings';
 
 export default function LoginRegister({ navigate }: { navigate: (hash: string) => void }) {
   const { login, register } = useAuth();
@@ -18,7 +19,7 @@ export default function LoginRegister({ navigate }: { navigate: (hash: string) =
     try {
       if (mode === 'login') await login(email, password);
       else await register(email, password, name);
-      show(mode === 'login' ? 'Logged in' : 'Account created', 'success');
+      show(mode === 'login' ? strings.auth.loggedIn : strings.auth.accountCreated, 'success');
       // navigate back to redirect if provided
       const qp = new URLSearchParams(window.location.hash.split('?')[1]);
       const redirect = qp.get('redirect');
@@ -30,33 +31,33 @@ export default function LoginRegister({ navigate }: { navigate: (hash: string) =
         navigate('#/');
       }
     } catch (e: any) {
-      setError(e.message || 'Auth failed');
-      show(e.message || 'Auth failed', 'error');
+      setError(e.message || strings.auth.authFailed);
+      show(e.message || strings.auth.authFailed, 'error');
     }
   };
 
   return (
     <div className="page auth card">
-      <h2>{mode === 'login' ? 'Login' : 'Register'}</h2>
+      <h2>{mode === 'login' ? strings.auth.login : strings.auth.register}</h2>
       <form onSubmit={submit}>
         {mode === 'register' && (
           <label>
-            Name
+            {strings.auth.name}
             <input value={name} onChange={(e) => setName(e.target.value)} />
           </label>
         )}
         <label>
-          Email
+          {strings.auth.email}
           <input value={email} onChange={(e) => setEmail(e.target.value)} />
         </label>
         <label>
-          Password
+          {strings.auth.password}
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
         </label>
         {error && <div className="form-error">{error}</div>}
         <div className="row actions">
-          <button className="primary-button" type="submit">{mode === 'login' ? 'Login' : 'Register'}</button>
-          <button type="button" className="link-button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>{mode === 'login' ? 'Create an account' : 'Have an account?'} </button>
+          <button className="primary-button" type="submit">{mode === 'login' ? strings.auth.login : strings.auth.register}</button>
+          <button type="button" className="link-button" onClick={() => setMode(mode === 'login' ? 'register' : 'login')}>{mode === 'login' ? strings.auth.createAccount : strings.auth.haveAccount} </button>
         </div>
       </form>
     </div>

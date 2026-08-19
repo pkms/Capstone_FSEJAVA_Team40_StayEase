@@ -1,6 +1,6 @@
-import React from 'react';
 import type { Hotel } from '../types';
 import defaultImage from '../assets/hotel-default.svg';
+import { strings } from '../constants/strings';
 
 interface Props {
   hotel: Hotel;
@@ -41,10 +41,10 @@ export default function HotelCard({ hotel, priceFrom, onView }: Props) {
       </div>
 
       <div className="hotel-stub">
-        <span className="stub-label">Rate from</span>
+        <span className="stub-label">{strings.hotelCard.rateFrom}</span>
         <div className="price">₹{priceFrom ?? '—'}</div>
-        <span className="stub-sub">per night</span>
-        <button className="small-button" onClick={() => onView(hotel.id)}>View Rooms</button>
+        <span className="stub-sub">{strings.hotelCard.perNight}</span>
+        <button className="small-button" onClick={() => onView(hotel.id)}>{strings.hotelCard.viewRooms}</button>
       </div>
     </article>
   );

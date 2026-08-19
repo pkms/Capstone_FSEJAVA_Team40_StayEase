@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { listUsers, getAllBookings, listAllHotels, createHotel, updateHotel, deleteHotel } from '../api/mockApi';
 import type { User, Booking, Hotel } from '../types';
 import { useToast } from '../contexts/ToastContext';
+import { strings } from '../constants/strings';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -16,7 +17,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!user) return;
     if (user.role !== 'ADMIN') {
-      show('Access denied: admin only', 'error');
+      show(strings.admin.accessDenied, 'error');
       window.location.hash = '#/';
       return;
     }
@@ -39,82 +40,82 @@ export default function AdminDashboard() {
   };
 
   const onDelete = async (h: Hotel) => {
-    if (!confirm(`Delete hotel "${h.name}"? This will remove its rooms.`)) return;
+    if (!confirm(strings.admin.deleteHotelConfirm.replace('{name}', h.name))) return;
     try {
       await deleteHotel(h.id);
-      show('Hotel deleted', 'info');
+      show(strings.admin.hotelDeleted, 'info');
       const updated = await listAllHotels();
       setHotels(updated);
     } catch (err: any) {
-      show(err?.message || 'Delete failed', 'error');
+      show(err?.message || strings.admin.deleteFailed, 'error');
     }
   };
 
   const onSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!form.name.trim() || !form.city.trim()) { show('Name and city required', 'error'); return; }
+    if (!form.name.trim() || !form.city.trim()) { show(strings.admin.nameAndCityRequired, 'error'); return; }
     try {
       if (editing) {
         await updateHotel(editing.id, { name: form.name, city: form.city, starRating: Number(form.starRating), description: form.description, coverImageUrl: form.coverImageUrl, managerId: form.managerId || undefined });
-        show('Hotel updated', 'success');
+        show(strings.admin.hotelUpdated, 'success');
       } else {
         await createHotel({ name: form.name, city: form.city, starRating: Number(form.starRating), description: form.description, coverImageUrl: form.coverImageUrl, managerId: form.managerId || undefined });
-        show('Hotel created', 'success');
+        show(strings.admin.hotelCreated, 'success');
       }
       const updated = await listAllHotels();
       setHotels(updated);
       resetForm();
     } catch (err: any) {
-      show(err?.message || 'Save failed', 'error');
+      show(err?.message || strings.admin.saveFailed, 'error');
     }
   };
 
   return (
     <div className="page admin card">
-      <h2>Admin Dashboard</h2>
+      <h2>{strings.admin.title}</h2>
 
       <section className="hotel-form card">
-        <h3>{editing ? `Edit Hotel: ${editing.name}` : 'Create New Hotel'}</h3>
+        <h3>{editing ? `${strings.admin.editHotel}${editing.name}` : strings.admin.createHotel}</h3>
         <form onSubmit={onSubmit}>
           <div className="form-row">
-            <label>Hotel name</label>
+            <label>{strings.admin.hotelName}</label>
             <input value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} />
           </div>
           <div className="form-row">
-            <label>City</label>
+            <label>{strings.admin.city}</label>
             <input value={form.city} onChange={(e) => setForm((f) => ({ ...f, city: e.target.value }))} />
           </div>
           <div className="form-row">
-            <label>Star rating</label>
+            <label>{strings.admin.starRating}</label>
             <input type="number" min={1} max={5} value={String(form.starRating)} onChange={(e) => setForm((f) => ({ ...f, starRating: Number(e.target.value) }))} />
           </div>
           <div className="form-row">
-            <label>Manager</label>
+            <label>{strings.admin.manager}</label>
             <select value={form.managerId} onChange={(e) => setForm((f) => ({ ...f, managerId: e.target.value }))}>
-              <option value="">(none)</option>
+              <option value="">{strings.admin.noManager}</option>
               {users.filter((u) => u.role === 'MANAGER').map((u) => <option key={u.id} value={u.id}>{u.name} ({u.email})</option>)}
             </select>
           </div>
           <div className="form-row">
-            <label>Cover image URL</label>
+            <label>{strings.admin.coverImageUrl}</label>
             <input value={form.coverImageUrl} onChange={(e) => setForm((f) => ({ ...f, coverImageUrl: e.target.value }))} />
           </div>
           <div className="form-row">
-            <label>Description</label>
+            <label>{strings.admin.description}</label>
             <textarea value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))} />
           </div>
           <div className="form-row">
-            <button type="submit" className="primary-button">{editing ? 'Save changes' : 'Create hotel'}</button>
-            {editing && <button type="button" className="small-button" onClick={resetForm}>Cancel</button>}
+            <button type="submit" className="primary-button">{editing ? strings.admin.saveChanges : strings.admin.createHotelAction}</button>
+            {editing && <button type="button" className="small-button" onClick={resetForm}>{strings.admin.cancel}</button>}
           </div>
         </form>
       </section>
 
       <section>
-        <h3>Hotels</h3>
+        <h3>{strings.admin.hotels}</h3>
         <table>
           <thead>
-            <tr><th>Name</th><th>City</th><th>Stars</th><th>Manager</th><th></th></tr>
+            <tr><th>{strings.admin.name}</th><th>{strings.admin.city}</th><th>{strings.admin.starRating}</th><th>{strings.admin.manager}</th><th></th></tr>
           </thead>
           <tbody>
             {hotels.map((h) => (
@@ -122,10 +123,10 @@ export default function AdminDashboard() {
                 <td>{h.name}</td>
                 <td>{h.city}</td>
                 <td>{h.starRating}</td>
-                <td>{(users.find((u) => u.id === h.managerId)?.name) ?? '-'}</td>
+                <td>{(users.find((u) => u.id === h.managerId)?.name) ?? strings.admin.none}</td>
                 <td>
-                  <button className="small-button" onClick={() => onEdit(h)}>Edit</button>
-                  <button className="small-button danger" onClick={() => onDelete(h)}>Delete</button>
+                  <button className="small-button" onClick={() => onEdit(h)}>{strings.admin.edit}</button>
+                  <button className="small-button danger" onClick={() => onDelete(h)}>{strings.admin.delete}</button>
                 </td>
               </tr>
             ))}
@@ -134,10 +135,10 @@ export default function AdminDashboard() {
       </section>
 
       <section>
-        <h3>Users</h3>
+        <h3>{strings.admin.users}</h3>
         <table>
           <thead>
-            <tr><th>Name</th><th>Email</th><th>Role</th></tr>
+            <tr><th>{strings.admin.name}</th><th>{strings.admin.email}</th><th>{strings.admin.role}</th></tr>
           </thead>
           <tbody>
             {users.map((u) => (
@@ -148,10 +149,10 @@ export default function AdminDashboard() {
       </section>
 
       <section>
-        <h3>All Bookings</h3>
+        <h3>{strings.admin.allBookings}</h3>
         <table>
           <thead>
-            <tr><th>Ref</th><th>User</th><th>Hotel</th><th>Room</th><th>Check-in</th><th>Check-out</th><th>Status</th></tr>
+            <tr><th>{strings.admin.ref}</th><th>{strings.admin.user}</th><th>{strings.admin.hotel}</th><th>{strings.admin.room}</th><th>{strings.admin.checkIn}</th><th>{strings.admin.checkOut}</th><th>{strings.admin.status}</th></tr>
           </thead>
           <tbody>
             {bookings.map((b) => (

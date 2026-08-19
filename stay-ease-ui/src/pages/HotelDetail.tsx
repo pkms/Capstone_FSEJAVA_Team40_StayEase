@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getHotelById, getAvailableRooms } from '../api/mockApi';
 import type { Hotel, Room } from '../types';
 import RoomCard from '../components/RoomCard';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
+import { strings } from '../constants/strings';
 
 export default function HotelDetail({ hotelId, query, navigate }: { hotelId: string; query: URLSearchParams; navigate: (hash: string) => void }) {
   const [hotel, setHotel] = useState<Hotel | null>(null);
@@ -28,7 +29,7 @@ export default function HotelDetail({ hotelId, query, navigate }: { hotelId: str
   const onBook = (roomId: string) => {
     if (!user) {
       // show toast and redirect to login (preserve current hash)
-      show('Please login to continue booking', 'warning');
+      show(strings.hotelDetail.pleaseLoginToBook, 'warning');
       return navigate(`#/login?redirect=${encodeURIComponent(window.location.hash)}`);
     }
     const checkIn = query.get('checkIn')!;
@@ -36,8 +37,8 @@ export default function HotelDetail({ hotelId, query, navigate }: { hotelId: str
     navigate(`#/book?hotelId=${hotelId}&roomId=${roomId}&checkIn=${encodeURIComponent(checkIn)}&checkOut=${encodeURIComponent(checkOut)}`);
   };
 
-  if (loading && !hotel) return <div>Loading…</div>;
-  if (!hotel) return <div>Hotel not found</div>;
+  if (loading && !hotel) return <div>{strings.hotelDetail.loading}</div>;
+  if (!hotel) return <div>{strings.hotelDetail.hotelNotFound}</div>;
 
   return (
     <div className="page hotel-detail">
@@ -45,8 +46,8 @@ export default function HotelDetail({ hotelId, query, navigate }: { hotelId: str
       <div className="card">
         <h2>{hotel.name} • {hotel.starRating}★</h2>
         <p>{hotel.description}</p>
-        <h3>Available Rooms</h3>
-        {rooms.length === 0 && <div>No rooms available for selected dates.</div>}
+        <h3>{strings.hotelDetail.availableRooms}</h3>
+        {rooms.length === 0 && <div>{strings.hotelDetail.noRooms}</div>}
         <div className="rooms-grid">
           {rooms.map((r) => (
             <RoomCard key={r.id} room={r} onBook={onBook} />

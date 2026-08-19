@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { strings } from '../constants/strings';
 
 interface Props {
   onSearch: (city: string, checkIn: string, checkOut: string) => void;
@@ -16,9 +17,9 @@ export default function SearchForm({ onSearch, initialCity = '', initialCheckIn 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    if (!city.trim()) return setError('City is required');
-    if (!checkIn || !checkOut) return setError('Check-in and Check-out are required');
-    if (new Date(checkOut) <= new Date(checkIn)) return setError('Check-out must be after check-in');
+    if (!city.trim()) return setError(strings.search.cityRequired);
+    if (!checkIn || !checkOut) return setError(strings.search.datesRequired);
+    if (new Date(checkOut) <= new Date(checkIn)) return setError(strings.search.checkOutAfterCheckIn);
     onSearch(city.trim(), checkIn, checkOut);
   };
 
@@ -26,18 +27,18 @@ export default function SearchForm({ onSearch, initialCity = '', initialCheckIn 
     <form className="search-form" onSubmit={submit}>
       <div className="row">
         <label>
-          <span className="field-label">Destination</span>
-          <input value={city} onChange={(e) => setCity(e.target.value)} placeholder="e.g. Goa" />
+          <span className="field-label">{strings.search.destination}</span>
+          <input value={city} onChange={(e) => setCity(e.target.value)} placeholder={strings.search.placeholderCity} />
         </label>
         <label>
-          <span className="field-label">Check-in</span>
+          <span className="field-label">{strings.search.checkIn}</span>
           <input type="date" value={checkIn} onChange={(e) => setCheckIn(e.target.value)} />
         </label>
         <label>
-          <span className="field-label">Check-out</span>
+          <span className="field-label">{strings.search.checkOut}</span>
           <input type="date" value={checkOut} onChange={(e) => setCheckOut(e.target.value)} />
         </label>
-        <button className="primary-button" type="submit">Search Hotels</button>
+        <button className="primary-button" type="submit">{strings.search.searchHotels}</button>
       </div>
 
       {error && <div className="form-error">{error}</div>}

@@ -41,7 +41,7 @@ function delay<T>(ms = 300, value?: T): Promise<T> {
   return new Promise((res) => setTimeout(() => res(value as T), ms));
 }
 
-export async function register(email: string, password: string, name: string) {
+export async function register(email: string, _password: string, name: string) {
   // password ignored for mock
   const exists = users.find((u) => u.email === email.toLowerCase());
   if (exists) throw new Error('Email already registered');
@@ -50,7 +50,7 @@ export async function register(email: string, password: string, name: string) {
   return delay(200, user);
 }
 
-export async function login(email: string, password: string) {
+export async function login(email: string, _password: string) {
   // password ignored for mock
   const user = users.find((u) => u.email === email.toLowerCase());
   if (!user) throw new Error('Invalid credentials');

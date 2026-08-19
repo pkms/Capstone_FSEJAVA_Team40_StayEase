@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import './App.css'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
 import { ToastProvider } from './contexts/ToastContext'
@@ -11,27 +11,28 @@ import MyStays from './pages/MyStays'
 import ManagerDashboard from './pages/ManagerDashboard'
 import AdminDashboard from './pages/AdminDashboard'
 import { useToast } from './contexts/ToastContext'
+import { strings } from './constants/strings';
 
 function NavBar({ navigate }: { navigate: (hash: string) => void }) {
   const { user, logout } = useAuth();
   const { show } = useToast();
   return (
     <header className="nav">
-      <div className="brand" onClick={() => navigate('#/')}>StayEase (Mock)</div>
+      <div className="brand" onClick={() => navigate('#/')}>{strings.app.brand}</div>
       <nav>
-        <button className="link-button" onClick={() => navigate('#/')}>Home</button>
-        <button className="link-button" onClick={() => navigate('#/mystays')}>My Stays</button>
-        {user?.role === 'MANAGER' && <button className="link-button" onClick={() => navigate('#/manager')}>Manager</button>}
-        {user?.role === 'ADMIN' && <button className="link-button" onClick={() => navigate('#/admin')}>Admin</button>}
+        <button className="link-button" onClick={() => navigate('#/')}>{strings.nav.home}</button>
+        <button className="link-button" onClick={() => navigate('#/mystays')}>{strings.nav.myStays}</button>
+        {user?.role === 'MANAGER' && <button className="link-button" onClick={() => navigate('#/manager')}>{strings.nav.manager}</button>}
+        {user?.role === 'ADMIN' && <button className="link-button" onClick={() => navigate('#/admin')}>{strings.nav.admin}</button>}
       </nav>
       <div className="account">
         {user ? (
           <>
             <span className="muted">{user.name}</span>
-            <button className="small-button" onClick={() => { logout(); show('Logged out', 'info'); navigate('#/'); }}>Logout</button>
+            <button className="small-button" onClick={() => { logout(); show(strings.auth.loggedOut, 'info'); navigate('#/'); }}>{strings.nav.logout}</button>
           </>
         ) : (
-          <button className="primary-button" onClick={() => navigate('#/login')}>Login / Register</button>
+          <button className="primary-button" onClick={() => navigate('#/login')}>{strings.nav.loginRegister}</button>
         )}
       </div>
     </header>

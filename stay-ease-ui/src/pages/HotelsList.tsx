@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { searchHotels } from '../api/mockApi';
 import type { Hotel } from '../types';
 import HotelCard from '../components/HotelCard';
+import { strings } from '../constants/strings';
 
 export default function HotelsList({ query, navigate }: { query: URLSearchParams; navigate: (hash: string) => void }) {
   const [hotels, setHotels] = useState<Hotel[]>([]);
@@ -16,9 +17,9 @@ export default function HotelsList({ query, navigate }: { query: URLSearchParams
 
   return (
     <div className="page hotels-list">
-      <h2>Hotels</h2>
-      {loading && <div>Loading…</div>}
-      {!loading && hotels.length === 0 && <div>No hotels found for that city.</div>}
+      <h2>{strings.hotels.title}</h2>
+      {loading && <div>{strings.hotels.loading}</div>}
+      {!loading && hotels.length === 0 && <div>{strings.hotels.noHotels}</div>}
       <div className="list-grid">
         {hotels.map((h) => (
           <HotelCard key={h.id} hotel={h} priceFrom={1000} onView={(id) => navigate(`#/hotel/${id}?checkIn=${encodeURIComponent(query.get('checkIn')||'')}&checkOut=${encodeURIComponent(query.get('checkOut')||'')}`)} />

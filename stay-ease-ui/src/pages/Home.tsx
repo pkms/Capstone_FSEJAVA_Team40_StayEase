@@ -1,5 +1,5 @@
-import React from 'react';
 import SearchForm from '../components/SearchForm';
+import { strings } from '../constants/strings';
 
 export default function Home({ navigate }: { navigate: (hash: string) => void }) {
   const onSearch = (city: string, checkIn: string, checkOut: string) => {
@@ -10,14 +10,14 @@ export default function Home({ navigate }: { navigate: (hash: string) => void })
   return (
     <div className="page home">
       <section className="hero card">
-        <h1>Find and book hotel rooms — simple, in minutes</h1>
-        <p>Search hotels by city and dates. This is a UI-only mock implementing the StayEase flows.</p>
+        <h1>{strings.home.title}</h1>
+        <p>{strings.home.subtitle}</p>
         <SearchForm onSearch={onSearch} />
       </section>
 
       <section className="promo card">
-        <h2>Seeded hotels</h2>
-        <p>Try searching for city: <strong>Goa</strong> and pick dates.</p>
+        <h2>{strings.home.seededHotels}</h2>
+        <p>{strings.home.cityHint}<strong>{strings.home.cityExample}</strong> {strings.home.pickDates}</p>
       </section>
     </div>
   );
