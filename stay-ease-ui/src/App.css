@@ -1,0 +1,432 @@
+/* ============================================================
+   StayEase — "Boarding Pass" design system
+   Booking a room, framed like checking in for a trip: ticket
+   stubs, dashed perforations, stamped mono numerals.
+   ============================================================ */
+
+:root{
+  --ink: #16232B;
+  --ink-soft: #5B6B70;
+  --paper: #F7F2E7;
+  --card: #FFFFFF;
+  --line: #E3D9C3;
+
+  --teal: #0B6D61;
+  --teal-dark: #054F46;
+  --teal-100: #E3F1EE;
+
+  --gold: #C0913A;
+  --gold-dark: #96701F;
+
+  --danger: #C1443B;
+  --success: #2F7D5A;
+  --warning: #C0913A;
+
+  --radius: 18px;
+  --radius-sm: 10px;
+  --shadow-card: 0 1px 2px rgba(22,35,43,0.05), 0 8px 20px rgba(22,35,43,0.04);
+  --shadow-card-hover: 0 10px 26px rgba(22,35,43,0.10);
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter', 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+  --stub-w: 128px;
+}
+
+.app-shell{
+  padding: 24px;
+  max-width: 1080px;
+  margin: 0 auto;
+}
+
+/* ---------- Nav ---------- */
+.nav{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:18px 28px;
+  background: var(--card);
+  border-radius: var(--radius);
+  border:1px solid var(--line);
+  box-shadow: var(--shadow-card);
+  margin-bottom:28px;
+}
+.brand{
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--teal-dark);
+  letter-spacing: 0.01em;
+  cursor:pointer;
+}
+.nav nav{ display:flex; align-items:center; gap:2px; }
+.nav .account{ display:flex; align-items:center; gap:14px; }
+.link-button{
+  background:none;
+  border:none;
+  color: var(--teal-dark);
+  font-weight:600;
+  font-size: 14px;
+  cursor:pointer;
+  margin-right:8px;
+  padding: 6px 4px;
+  transition: color .15s ease;
+}
+.link-button:hover{ color: var(--teal); }
+
+/* ---------- Buttons ---------- */
+.small-button{
+  padding:9px 16px;
+  border-radius: 999px;
+  border:1.5px solid var(--teal-dark);
+  background: transparent;
+  color: var(--teal-dark);
+  font-weight:600;
+  font-size: 13px;
+  cursor:pointer;
+  transition: background .15s ease, color .15s ease, transform .15s ease;
+}
+.small-button:hover{ background: var(--teal-dark); color:#fff; transform: translateY(-1px); }
+
+.primary-button{
+  background: var(--teal-dark);
+  color:#fff;
+  border:none;
+  padding:12px 24px;
+  border-radius: 999px;
+  font-weight:600;
+  font-size: 14px;
+  cursor:pointer;
+  transition: background .15s ease, transform .15s ease;
+  white-space: nowrap;
+}
+.primary-button:hover{ background: var(--teal); transform: translateY(-1px); }
+
+.primary-button:focus-visible,
+.small-button:focus-visible,
+.link-button:focus-visible,
+input:focus-visible{
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* ---------- Generic card + hero ---------- */
+.card{
+  background:var(--card);
+  padding:22px;
+  border-radius: var(--radius);
+  border:1px solid var(--line);
+  box-shadow: var(--shadow-card);
+  margin-bottom:20px;
+}
+.hero{ display:grid; gap:14px; }
+.promo{ background: var(--teal-100); border-color: transparent; box-shadow:none; }
+
+/* ---------- Search form — "check-in desk" ---------- */
+.search-form{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow: var(--shadow-card);
+  padding:22px 24px;
+  margin-bottom:24px;
+}
+.search-form .row{ display:flex; gap:20px; align-items:flex-end; flex-wrap:wrap; }
+.search-form label{ display:flex; flex-direction:column; gap:7px; flex:1; min-width:160px; }
+.field-label{
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+}
+.search-form input{
+  border:none;
+  border-bottom:2px solid var(--line);
+  padding:8px 2px;
+  background:transparent;
+  font-size:15px;
+  color:var(--ink);
+  transition: border-color .15s ease;
+}
+.search-form input:focus{ outline:none; border-bottom-color: var(--teal); }
+.search-form .primary-button{ flex:0 0 auto; }
+.form-error{
+  margin-top:14px;
+  color: var(--danger);
+  font-size:13px;
+  font-weight:600;
+  background: #FBEAE8;
+  border:1px dashed var(--danger);
+  padding:9px 14px;
+  border-radius: var(--radius-sm);
+  display:inline-block;
+}
+
+/* ---------- Listing grid ---------- */
+.list-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(420px,1fr)); gap:20px; }
+
+/* ---------- Hotel card — boarding-pass layout ---------- */
+.hotel-card{
+  position:relative;
+  display:flex;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow:visible;
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.hotel-card:hover{ box-shadow: var(--shadow-card-hover); transform: translateY(-2px); }
+
+.hotel-image-wrap{ position:relative; flex:0 0 120px; }
+.hotel-cover{
+  width:100%;
+  height:100%;
+  min-height:190px;
+  object-fit:cover;
+  border-radius: var(--radius) 0 0 var(--radius);
+  display:block;
+}
+.hotel-badge{
+  position:absolute; top:10px; left:10px;
+  background:rgba(22,35,43,0.72);
+  color:#fff;
+  font-family:var(--font-mono);
+  font-size:10px;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  padding:4px 9px;
+  border-radius: 999px;
+}
+
+.hotel-body{ flex:1 1 160px; padding:16px 20px; display:flex; flex-direction:column; gap:8px; min-width:160px; }
+.hotel-heading{ display:flex; align-items:baseline; justify-content:space-between; gap:10px; flex-wrap:wrap; row-gap:4px; }
+.hotel-body h3{ font-family:var(--font-display); font-size:19px; font-weight:600; margin:0; color:var(--ink); overflow-wrap:break-word; }
+.hotel-card .meta{ color:var(--ink-soft); font-size:13px; }
+.hotel-card .desc{ color:var(--ink-soft); font-size:13.5px; line-height:1.55; margin:0; }
+
+.stars{ display:inline-flex; gap:1px; flex:0 0 auto; }
+.star{ color: var(--line); font-size:13px; }
+.star--filled{ color: var(--gold); }
+
+.hotel-stub, .room-stub{
+  flex:0 0 var(--stub-w);
+  border-left:2px dashed var(--line);
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  gap:3px;
+}
+.hotel-stub::before, .hotel-stub::after,
+.room-stub::before, .room-stub::after{
+  content:"";
+  position:absolute;
+  width:20px; height:20px;
+  background:var(--paper);
+  border:1px solid var(--line);
+  border-radius:50%;
+  right: calc(var(--stub-w) - 10px);
+}
+.hotel-stub::before, .room-stub::before{ top:-11px; }
+.hotel-stub::after, .room-stub::after{ bottom:-11px; }
+
+.stub-label{ font-family:var(--font-mono); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-soft); }
+.stub-sub{ font-family:var(--font-mono); font-size:10px; color:var(--ink-soft); margin-bottom:6px; }
+.hotel-stub .price, .room-stub .price{ font-family:var(--font-display); font-size:23px; font-weight:700; color:var(--teal-dark); line-height:1.1; }
+.hotel-stub .small-button, .room-stub .small-button{ margin-top:8px; width:100%; text-align:center; }
+
+/* ---------- Room card — ticket stub ---------- */
+.room-card{
+  position:relative;
+  display:flex;
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  box-shadow: var(--shadow-card);
+  margin-bottom:14px;
+  overflow:visible;
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.room-card:hover{ box-shadow: var(--shadow-card-hover); transform: translateY(-2px); }
+
+.room-main{ flex:1; padding:18px 20px; display:flex; flex-direction:column; gap:4px; }
+.room-type{ font-family:var(--font-display); font-size:17px; font-weight:600; color:var(--ink); }
+.room-number{ font-family:var(--font-mono); font-size:12px; color:var(--ink-soft); }
+.room-desc{ color:var(--ink-soft); font-size:13.5px; line-height:1.5; margin:6px 0 0; }
+.room-occupancy{ color:var(--ink-soft); font-size:12.5px; margin-top:4px; }
+
+/* ---------- Misc / shared page bits ---------- */
+.cover{ height:220px; background-size:cover; background-position:center; border-radius: var(--radius); margin-bottom:12px; }
+.rooms-grid{ display:flex; flex-direction:column; }
+.page h2{ font-family:var(--font-display); margin-top:0; color:var(--ink); }
+
+.stays-table{ width:100%; border-collapse:collapse; background:var(--card); border-radius:var(--radius); overflow:hidden; box-shadow: var(--shadow-card); }
+.stays-table td, .stays-table th{ border-bottom:1px solid var(--line); padding:12px 14px; text-align:left; }
+.stays-table th{ font-family:var(--font-mono); font-size:11px; text-transform:uppercase; letter-spacing:0.06em; color:var(--ink-soft); background:var(--teal-100); }
+.stays-table tr:last-child td{ border-bottom:none; }
+.muted{ color: var(--ink-soft); }
+.footer{ display:flex; justify-content:space-between; align-items:center; }
+
+/* ---------- Toasts ---------- */
+.toast-viewport{ position:fixed; right:20px; top:20px; display:flex; flex-direction:column; gap:8px; z-index:9999; }
+.toast{
+  min-width:220px;
+  padding:12px 16px;
+  border-radius: var(--radius-sm);
+  color:#fff;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(22,35,43,0.18);
+  font-size:13.5px;
+  font-weight:500;
+}
+.toast.info{ background: var(--teal-dark); }
+.toast.success{ background: var(--success); }
+.toast.error{ background: var(--danger); }
+.toast.warning{ background: var(--gold); color:#1a1305; }
+
+/* ---------- Page typography ---------- */
+.page h1{ font-family:var(--font-display); font-size:34px; line-height:1.18; font-weight:600; color:var(--ink); margin:0 0 12px; }
+.page > p, .hero > p, .promo > p{ color:var(--ink-soft); font-size:15px; line-height:1.6; margin:0 0 4px; }
+.page h3{
+  font-family:var(--font-display);
+  font-size:17px;
+  font-weight:600;
+  color:var(--ink);
+  margin:28px 0 14px;
+  padding-bottom:8px;
+  border-bottom:1px dashed var(--line);
+}
+.page section:first-of-type h3{ margin-top:0; }
+
+/* ---------- Generic form fields (Admin / Manager / Auth forms) ---------- */
+.page label{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+  font-family:var(--font-mono);
+  font-size:11px;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  color:var(--ink-soft);
+  margin-bottom:16px;
+}
+.page input,
+.page select,
+.page textarea{
+  font-family:var(--font-body);
+  text-transform:none;
+  letter-spacing:normal;
+  border:none;
+  border-bottom:2px solid var(--line);
+  background:transparent;
+  padding:9px 2px;
+  font-size:14.5px;
+  color:var(--ink);
+  width:100%;
+  transition:border-color .15s ease;
+}
+.page select{
+  border:1px solid var(--line);
+  border-radius:var(--radius-sm);
+  padding:9px 10px;
+  background:var(--card);
+}
+.page textarea{
+  border:1px solid var(--line);
+  border-radius:var(--radius-sm);
+  padding:11px 12px;
+  background:var(--card);
+  min-height:90px;
+  resize:vertical;
+}
+.page input:focus, .page select:focus, .page textarea:focus{
+  outline:none;
+  border-color:var(--teal);
+}
+.form-row{ margin-bottom:16px; }
+.form-row label{ margin-bottom:0; }
+
+.row{ display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.actions{ display:flex; gap:12px; align-items:center; margin-top:18px; }
+
+/* ---------- Danger button variant ---------- */
+.small-button.danger{ border-color:var(--danger); color:var(--danger); margin-left:8px; }
+.small-button.danger:hover{ background:var(--danger); color:#fff; }
+
+/* ---------- Confirmation / success panel ---------- */
+.success{
+  margin-top:18px;
+  padding:22px;
+  border:2px dashed var(--teal);
+  border-radius:var(--radius);
+  background:var(--teal-100);
+}
+.success h3{ margin-top:0; border-bottom:none; padding-bottom:0; color:var(--teal-dark); }
+
+/* ---------- Status badges (bookings) ---------- */
+.status-badge{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  padding:4px 10px;
+  border-radius:999px;
+  display:inline-block;
+}
+.status-badge.confirmed{ background:var(--teal-100); color:var(--teal-dark); }
+.status-badge.cancelled{ background:#FBEAE8; color:var(--danger); }
+
+/* ---------- Generic tables (Admin / Manager) ---------- */
+.page table{
+  width:100%;
+  border-collapse:collapse;
+  background:var(--card);
+  border-radius:var(--radius);
+  overflow:hidden;
+  box-shadow:var(--shadow-card);
+  margin-bottom:14px;
+}
+.page table th, .page table td{
+  border-bottom:1px solid var(--line);
+  padding:10px 14px;
+  text-align:left;
+  font-size:13.5px;
+}
+.page table th{
+  font-family:var(--font-mono);
+  font-size:10.5px;
+  text-transform:uppercase;
+  letter-spacing:0.06em;
+  color:var(--ink-soft);
+  background:var(--teal-100);
+}
+.page table tr:last-child td{ border-bottom:none; }
+
+/* ---------- Auth page ---------- */
+.auth.card{ max-width:420px; margin:32px auto; }
+.auth .row.actions{ justify-content:space-between; }
+
+/* ---------- Responsive: stack tickets, flip perforation ---------- */
+@media (max-width: 640px){
+  .hotel-card, .room-card{ flex-direction:column; }
+  .hotel-image-wrap{ flex-basis:auto; }
+  .hotel-body{ min-width:0; }
+  .hotel-cover{ border-radius: var(--radius) var(--radius) 0 0; min-height:170px; }
+
+  .hotel-stub, .room-stub{
+    border-left:none;
+    border-top:2px dashed var(--line);
+    flex-basis:auto;
+    align-items:flex-start;
+  }
+  .hotel-stub::before, .room-stub::before{ top:-11px; left:-11px; right:auto; bottom:auto; }
+  .hotel-stub::after, .room-stub::after{ top:-11px; right:-11px; left:auto; bottom:auto; }
+
+  .search-form .row{ flex-direction:column; align-items:stretch; }
+  .search-form .primary-button{ width:100%; }
+}

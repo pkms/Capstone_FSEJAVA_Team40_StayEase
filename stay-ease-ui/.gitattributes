@@ -1,0 +1,27 @@
+# Set default behavior to automatically normalize line endings in the repo
+* text=auto
+
+# Explicitly treat common text files as text (normalized to LF in the repository)
+*.js     text
+*.jsx    text
+*.ts     text
+*.tsx    text
+*.css    text
+*.scss   text
+*.html   text
+*.json   text
+*.md     text
+*.yml    text
+*.yaml   text
+*.svg    text
+*.xml    text
+
+# Binary files — do not attempt to normalize
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.pdf    binary
+
+# End of file
