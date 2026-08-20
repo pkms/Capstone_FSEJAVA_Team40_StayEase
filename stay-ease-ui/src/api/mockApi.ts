@@ -53,7 +53,7 @@ function mapBooking(b: any): Booking {
 
 // <input type="date"> gives "YYYY-MM-DD"; the backend expects a full ISO date-time.
 function toIsoDateTime(dateStr: string) {
-  return new Date(`${dateStr}T00:00:00`).toISOString();
+  return `${dateStr}T00:00:00`;
 }
 
 // ---------------------------------------------------------------------------
