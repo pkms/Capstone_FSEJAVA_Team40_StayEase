@@ -31,6 +31,11 @@ public class HotelService
         return ConvertUtils.toHotelResponse(this.hotelRepository.findByCity(city));
     }
 
+    public List<HotelResponse> getAllHotels()
+    {
+        return ConvertUtils.toHotelResponse(this.hotelRepository.findAll());
+    }
+
     public List<RoomResponse> getAvailableRooms(UUID id, LocalDateTime checkInDate, LocalDateTime checkOutDate)
     {
         List<Room> activeRooms = this.roomService.findActiveRoomsInHotel(id);

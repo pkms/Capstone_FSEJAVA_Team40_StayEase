@@ -54,7 +54,7 @@ public class SecurityConfiguration
                                 "/api/auth/register",
                                 "/api/auth/login"
                         ).permitAll()
-                        .requestMatchers("/api/hotels/create","/api/hotels/{id}/update")
+                        .requestMatchers("/api/hotels/create","/api/hotels/{id}/update","/api/hotels/{id}/delete","/api/hotels/all")
                         .hasAuthority("ADMIN")
                         .requestMatchers("/api/hotels/{id}/createRoom","/api/rooms/**")
                         .hasAuthority("MANAGER")
