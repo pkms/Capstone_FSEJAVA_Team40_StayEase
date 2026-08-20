@@ -2,6 +2,8 @@ package com.capstone.team40.controller;
 
 import com.capstone.team40.model.CreateUserRequest;
 import com.capstone.team40.model.LoginRequest;
+import com.capstone.team40.model.UserLoginResponse;
+import com.capstone.team40.model.UserResponse;
 import com.capstone.team40.service.JwtService;
 import com.capstone.team40.service.UserService;
 import jakarta.validation.Valid;
@@ -31,9 +33,12 @@ public class AuthenticationController
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest)
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginRequest)
     {
-        return this.userService.login(loginRequest) ? ResponseEntity.ok().body("Bearer " + this.jwtService.generateToken(loginRequest.email())) : ResponseEntity.badRequest().body("User does not exists in the system or password did not match");
+        UserResponse userResponse = this.userService.login(loginRequest);
+        return  userResponse != null ?
+                ResponseEntity.ok().body(new UserLoginResponse("Bearer " + this.jwtService.generateToken(loginRequest.email()), userResponse.grantedAuthority().getAuthority())) :
+                ResponseEntity.badRequest().body("User does not exists in the system or password did not match");
     }
 
     @PostMapping("/logout")

@@ -29,14 +29,14 @@ public class UserService
         return true;
     }
 
-    public boolean login(LoginRequest loginRequest)
+    public UserResponse login(LoginRequest loginRequest)
     {
         User user = userRepository.findByEmail(loginRequest.email());
-        if(user == null)
+        if(user != null)
         {
-            return false;
+            return passwordEncoder.matches(loginRequest.password(), user.getPasswordHash()) ? ConvertUtils.toUserResponse(user) : null;
         }
-        return passwordEncoder.matches(loginRequest.password(), user.getPasswordHash());
+        return null;
     }
 
     public UserResponse forEmailId(String email)
