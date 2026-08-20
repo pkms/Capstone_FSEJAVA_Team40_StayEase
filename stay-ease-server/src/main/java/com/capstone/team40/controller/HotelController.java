@@ -29,6 +29,12 @@ public class HotelController
         return ResponseEntity.ok().body(this.hotelService.forCity(city));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<List<HotelResponse>> getAllHotels()
+    {
+        return ResponseEntity.ok().body(this.hotelService.getAllHotels());
+    }
+
     @GetMapping("/{id}/availableRooms")
     public ResponseEntity<?> getAvailableRooms(@PathVariable("id") UUID id,
                                                @RequestParam("checkInDate") @Valid @ValidLocalDateTime LocalDateTime checkInDate,
