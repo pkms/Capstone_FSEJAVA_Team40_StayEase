@@ -1,5 +1,6 @@
 package com.capstone.team40.service;
 
+import com.capstone.team40.enums.Role;
 import com.capstone.team40.model.CreateUserRequest;
 import com.capstone.team40.model.LoginRequest;
 import com.capstone.team40.entity.User;
@@ -11,6 +12,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -54,5 +56,10 @@ public class UserService
     public boolean isUserExists(UUID uuid)
     {
         return this.userRepository.existsById(uuid);
+    }
+
+    public List<UserResponse> getUsersByRole(Role role)
+    {
+        return ConvertUtils.toUserResponse(this.userRepository.findByRole(role));
     }
 }
