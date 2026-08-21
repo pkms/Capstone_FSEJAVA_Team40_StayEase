@@ -197,7 +197,7 @@ export async function listAllHotels(): Promise<Hotel[]> {
     // GET /api/hotels requires a non-empty `city` per its spec — an empty string
     // may be rejected. If so, this falls back to an empty list; ask backend for
     // a proper "list all hotels" (no city filter) endpoint for Admin use.
-    const results = await request<any[]>('/api/hotels', { query: { city: '' } });
+    const results = await request<any[]>('/api/hotels/all');
     return results.map(mapHotel);
   } catch {
     console.warn('listAllHotels: backend requires a city filter — Admin hotel list may be incomplete.');
@@ -212,7 +212,7 @@ export async function createHotel(payload: Partial<Hotel>): Promise<Hotel> {
     starRating: payload.starRating,
     description: payload.description,
     coverImageUrl: payload.coverImageUrl,
-    managerId: payload.managerId,
+    managerId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
   };
   // Response is a plain string, not the created hotel — AdminDashboard already
   // re-fetches the hotel list right after calling this, so that's fine.

@@ -44,7 +44,12 @@ public class ConvertUtils
 
     public static UserResponse toUserResponse(User user)
     {
-        return new UserResponse(user.getEmail(), new SimpleGrantedAuthority(user.getRole().name()));
+        return new UserResponse(user.getEmail(), new SimpleGrantedAuthority(user.getRole().name()), user.getId(), user.getName());
+    }
+
+    public static List<UserResponse> toUserResponse(List<User> users)
+    {
+        return users.stream().map(user -> new UserResponse(user.getEmail(), new SimpleGrantedAuthority(user.getRole().name()), user.getId(), user.getName())).collect(Collectors.toList());
     }
 
     public static Booking toBooking(CreateBookingRequest createBookingRequest)

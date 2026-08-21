@@ -5,6 +5,7 @@ import com.capstone.team40.entity.Hotel;
 import com.capstone.team40.entity.Room;
 import com.capstone.team40.model.*;
 import com.capstone.team40.service.HotelService;
+import com.capstone.team40.service.UserService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +23,9 @@ public class HotelController
 {
     @Autowired
     private HotelService hotelService;
+
+    @Autowired
+    private UserService userService;
 
     @GetMapping
     public ResponseEntity<List<HotelResponse>> getHotels(@RequestParam("city") @Valid @NotBlank String city)
@@ -50,6 +54,10 @@ public class HotelController
     @PostMapping("/create")
     public ResponseEntity<String> createHotel(@RequestBody @Valid CreateHotelRequest createHotelRequest)
     {
+        if(!this.userService.isUserExists(createHotelRequest.managerId()))
+        {
+            return ResponseEntity.badRequest().body("Manager with provided ID does not exists in the System.");
+        }
         return ResponseEntity.status(HttpStatus.CREATED).body("Hotel successfully created with ID - " +this.hotelService.createHotel(createHotelRequest).getId());
     }
 

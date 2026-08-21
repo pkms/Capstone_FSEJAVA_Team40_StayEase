@@ -28,7 +28,7 @@ public class SecurityConfiguration
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
@@ -54,10 +54,12 @@ public class SecurityConfiguration
                                 "/api/auth/register",
                                 "/api/auth/login"
                         ).permitAll()
-                        .requestMatchers("/api/hotels/create","/api/hotels/{id}/update","/api/hotels/{id}/delete","/api/hotels/all")
+                        .requestMatchers("/api/hotels/create","/api/hotels/{id}/update","/api/hotels/{id}/delete","/api/users/{role}")
                         .hasAuthority("ADMIN")
                         .requestMatchers("/api/hotels/{id}/createRoom","/api/rooms/**")
                         .hasAuthority("MANAGER")
+                        .requestMatchers("/api/hotels/all")
+                        .hasAnyAuthority("ADMIN","MANAGER")
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtTokenAuthorizationOncePerRequestFilter, UsernamePasswordAuthenticationFilter.class)
