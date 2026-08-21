@@ -10,7 +10,7 @@ import { request, setToken, setStoredRole, clearToken, decodeToken } from './cli
 
 function mapHotel(h: any): Hotel {
   return {
-    id: h.hotelId,
+    id: h.hotelId ?? h.id,
     name: h.name,
     city: h.city,
     starRating: h.starRating,
@@ -35,19 +35,35 @@ function mapRoom(r: any, fallbackHotelId?: string): Room {
 }
 
 function mapBooking(b: any): Booking {
+  const room = b.room ?? {};
+  const hotel = room.hotel ?? b.hotel ?? {};
+  const checkInDate = b.checkInDate;
+  const checkOutDate = b.checkOutDate;
+  const nights = Math.max(
+    0,
+    Math.ceil((new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / (1000 * 60 * 60 * 24))
+  );
+  const totalPrice = room.pricePerNight !== undefined
+    ? Number(room.pricePerNight) * nights
+    : (b.totalPrice ?? 0);
   return {
     id: b.id,
     // Backend doesn't return a separate booking reference — reuse the id.
     bookingRef: b.id,
     userId: '', // not returned by /api/bookings/mine; backend identifies the user via the JWT instead
-    hotelId: b.room?.hotelId ?? '',
-    roomId: b.room?.roomId ?? '',
-    checkInDate: b.checkInDate,
-    checkOutDate: b.checkOutDate,
-    // NOTE: backend's BookingResponse has no totalPrice field yet — shows as 0 until added.
-    totalPrice: b.totalPrice ?? 0,
-    status: b.bookingStatus === 'CANCELLED' ? 'CANCELLED' : 'CONFIRMED',
-    createdAt: b.checkInDate,
+    hotelId: room.hotelId ?? hotel.hotelId ?? hotel.id ?? b.hotelId ?? '',
+    hotelName: hotel.name ?? b.hotelName,
+    roomId: room.roomId ?? b.roomId ?? '',
+    roomNumber: room.roomNumber !== undefined ? String(room.roomNumber) : (b.roomNumber !== undefined ? String(b.roomNumber) : undefined),
+    checkInDate,
+    checkOutDate,
+    totalPrice,
+    status: (b.bookingStatus ?? b.status) === 'CANCELLED'
+      ? 'CANCELLED'
+      : (b.bookingStatus ?? b.status) === 'COMPLETED'
+        ? 'COMPLETED'
+        : 'CONFIRMED',
+    createdAt: checkInDate,
   };
 }
 
@@ -126,8 +142,17 @@ export async function getAvailableRooms(hotelId: string, checkInDate: string, ch
 }
 
 export async function listHotelsForManager(managerId: string): Promise<Hotel[]> {
-  const results = await request<any[]>('/api/hotels/all');
-  const mapped = results.map(mapHotel).filter((hotel) => hotel.managerId === managerId);
+  const [results, managers] = await Promise.all([
+    request<any[]>('/api/hotels/all'),
+    listUsers('MANAGER'),
+  ]);
+  const manager = managers.find((candidate) =>
+    candidate.id === managerId || candidate.email.toLowerCase() === managerId.toLowerCase()
+  );
+  const assignedManagerId = manager?.id ?? managerId;
+  const mapped = results
+    .map(mapHotel)
+    .filter((hotel) => hotel.managerId?.toLowerCase() === assignedManagerId.toLowerCase());
   mapped.forEach((hotel) => hotelCache.set(hotel.id, hotel));
   return mapped;
 }

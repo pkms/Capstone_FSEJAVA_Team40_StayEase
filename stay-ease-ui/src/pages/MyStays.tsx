@@ -46,13 +46,13 @@ export default function MyStays({ navigate }: { navigate: (hash: string) => void
         <tbody>
           {bookings.map((b) => (
             <tr key={b.id}>
-              <td>{b.hotelId}</td>
-              <td>{b.roomId}</td>
-              <td>{b.checkInDate}</td>
-              <td>{b.checkOutDate}</td>
+              <td>{b.hotelName ?? b.hotelId}</td>
+              <td>{b.roomNumber ?? b.roomId}</td>
+              <td>{b.checkInDate?.split('T')[0]}</td>
+              <td>{b.checkOutDate?.split('T')[0]}</td>
               <td>₹{b.totalPrice}</td>
               <td><span className={`status-badge ${b.status.toLowerCase()}`}>{b.status}</span></td>
-              <td>{b.status !== 'CANCELLED' && <button className="small-button" onClick={() => doCancel(b.id)}>{strings.myStays.cancel}</button>}</td>
+              <td>{b.status === 'CONFIRMED' && <button className="small-button" onClick={() => doCancel(b.id)}>{strings.myStays.cancel}</button>}</td>
             </tr>
           ))}
         </tbody>

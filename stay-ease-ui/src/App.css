@@ -378,8 +378,23 @@ input:focus-visible{
   border-radius:999px;
   display:inline-block;
 }
-.status-badge.confirmed{ background:var(--teal-100); color:var(--teal-dark); }
-.status-badge.cancelled{ background:#FBEAE8; color:var(--danger); }
+.status-badge.confirmed{
+  background:var(--teal-100);
+  color:var(--teal-dark);
+  border:1px solid #B9DED7;
+}
+.status-badge.completed{
+  background:#E7F4EA;
+  color:#28633A;
+  border:1px solid #B8DDBF;
+}
+.status-badge.cancelled{
+  background:#FBEAE8;
+  color:var(--danger);
+  border:1px solid #E9B9B4;
+  text-decoration:line-through;
+  text-decoration-thickness:1px;
+}
 
 /* ---------- Generic tables (Admin / Manager) ---------- */
 .page table{
