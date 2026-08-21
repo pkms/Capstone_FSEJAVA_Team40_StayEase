@@ -1,6 +1,6 @@
 // Real StayEase backend integration.
 
-import type { Hotel, Room, User, Booking, Role } from '../types';
+import type { Hotel, Room, RoomType, User, Booking, Role } from '../types';
 import { request, setToken, setStoredRole, clearToken, decodeToken } from './client';
 
 // ---------------------------------------------------------------------------
@@ -117,12 +117,30 @@ export async function getHotelById(id: string): Promise<Hotel> {
   throw new Error('Hotel details unavailable — ask a hotel list first, or add GET /api/hotels/{id} on the backend.');
 }
 
-export async function getAvailableRooms(hotelId: string, checkIn: string, checkOut: string): Promise<Room[]> {
-  const data = await request<any>(`/api/hotels/${hotelId}/availableRooms`, {
-    query: { checkInDate: toIsoDateTime(checkIn), checkOutDate: toIsoDateTime(checkOut) },
+export async function getAvailableRooms(hotelId: string, checkInDate: string, checkOutDate: string): Promise<Room[]> {
+  const data = await request<any>(`/api/hotels/${encodeURIComponent(hotelId)}/availableRooms`, {
+    query: { checkInDate: toIsoDateTime(checkInDate), checkOutDate: toIsoDateTime(checkOutDate) },
   });
   const list = Array.isArray(data) ? data : (data?.rooms ?? []);
   return list.map((r: any) => mapRoom(r, hotelId));
+}
+
+export async function listHotelsForManager(managerId: string): Promise<Hotel[]> {
+  const results = await request<any[]>('/api/hotels/all');
+  const mapped = results.map(mapHotel).filter((hotel) => hotel.managerId === managerId);
+  mapped.forEach((hotel) => hotelCache.set(hotel.id, hotel));
+  return mapped;
+}
+
+export async function createRoom(
+  hotelId: string,
+  payload: { roomNumber: number; roomType: RoomType; pricePerNight: number; maxOccupancy: number }
+): Promise<Room> {
+  const response = await request<any>(`/api/hotels/${encodeURIComponent(hotelId)}/createRoom`, {
+    method: 'POST',
+    body: payload,
+  });
+  return mapRoom(response, hotelId);
 }
 
 // ---------------------------------------------------------------------------
@@ -182,9 +200,22 @@ export async function listUpcomingBookingsForManager(_managerId: string): Promis
 // Admin dashboard
 // ---------------------------------------------------------------------------
 
-export async function listUsers(): Promise<User[]> {
-  console.warn('listUsers: no backend endpoint yet — returning empty list.');
-  return [];
+interface BackendUser {
+  email: string;
+  grantedAuthority?: { authority?: string };
+  id: string;
+  name: string;
+}
+
+export async function listUsers(role?: Role): Promise<User[]> {
+  const path = role ? `/api/users/${encodeURIComponent(role)}` : '/api/users';
+  const users = await request<BackendUser[]>(path);
+  return users.map((backendUser) => ({
+    id: backendUser.id,
+    email: backendUser.email,
+    name: backendUser.name,
+    role: role ?? (backendUser.grantedAuthority?.authority?.replace(/^ROLE_/, '') as Role) ?? 'GUEST',
+  }));
 }
 
 export async function getAllBookings(): Promise<Booking[]> {
@@ -212,7 +243,7 @@ export async function createHotel(payload: Partial<Hotel>): Promise<Hotel> {
     starRating: payload.starRating,
     description: payload.description,
     coverImageUrl: payload.coverImageUrl,
-    managerId: "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+    managerId: payload.managerId,
   };
   // Response is a plain string, not the created hotel — AdminDashboard already
   // re-fetches the hotel list right after calling this, so that's fine.
@@ -226,9 +257,8 @@ export async function updateHotel(id: string, payload: Partial<Hotel>): Promise<
     city: payload.city,
     description: payload.description,
     coverImageUrl: payload.coverImageUrl,
+    managerId: payload.managerId,
   };
-  // NOTE: UpdateHotelRequest has no starRating or managerId field — those can't
-  // be changed via this endpoint on the current backend.
   await request(`/api/hotels/${id}/update`, { method: 'PUT', body });
   return { id, ...body } as unknown as Hotel;
 }
@@ -245,6 +275,8 @@ export default {
   searchHotels,
   getHotelById,
   getAvailableRooms,
+  listHotelsForManager,
+  createRoom,
   createBooking,
   getBookingsForUser,
   cancelBooking,

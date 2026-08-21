@@ -21,7 +21,7 @@ export default function AdminDashboard() {
       window.location.hash = '#/';
       return;
     }
-    listUsers().then((u) => setUsers(u));
+    listUsers('MANAGER').then((u) => setUsers(u));
     getAllBookings().then((b) => setBookings(b));
     listAllHotels().then((h) => setHotels(h));
   }, [user]);
