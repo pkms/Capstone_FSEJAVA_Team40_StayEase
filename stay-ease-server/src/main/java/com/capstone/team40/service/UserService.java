@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.UUID;
+
 @Component
 public class UserService
 {
@@ -47,5 +49,10 @@ public class UserService
             throw new UsernameNotFoundException("User name does not exists in the system !");
         }
         return ConvertUtils.toUserResponse(user);
+    }
+
+    public boolean isUserExists(UUID uuid)
+    {
+        return this.userRepository.existsById(uuid);
     }
 }
