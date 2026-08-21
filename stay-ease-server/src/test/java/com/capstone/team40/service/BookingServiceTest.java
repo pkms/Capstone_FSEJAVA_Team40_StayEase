@@ -1,11 +1,13 @@
 package com.capstone.team40.service;
 
 import com.capstone.team40.entity.Booking;
+import com.capstone.team40.entity.Hotel;
 import com.capstone.team40.entity.Room;
 import com.capstone.team40.enums.BookingStatus;
 import com.capstone.team40.model.BookingResponse;
 import com.capstone.team40.model.CreateBookingRequest;
 import com.capstone.team40.repository.BookingRepository;
+import com.capstone.team40.repository.HotelRepository;
 import com.capstone.team40.utils.ConvertUtils;
 import org.apache.coyote.BadRequestException;
 import org.junit.jupiter.api.Test;
@@ -31,6 +33,9 @@ class BookingServiceTest {
 
 	@Mock
 	private RoomService roomService;
+
+	@Mock
+	private HotelRepository hotelRepository;
 
 	@Mock
 	private CreateBookingRequest createBookingRequest;
@@ -312,6 +317,8 @@ class BookingServiceTest {
 
 		UUID roomId = UUID.randomUUID();
 
+		UUID hotelId = UUID.randomUUID();
+
 		Booking booking1 = mock(Booking.class);
 
 		when(booking1.getRoomId()).thenReturn(roomId);
@@ -319,14 +326,17 @@ class BookingServiceTest {
 		when(bookingRepository.findByCreatedBy(loggedInUser)).thenReturn(List.of(booking1));
 
 		Room room = mock(Room.class);
+		Hotel hotel = mock(Hotel.class);
 
 		when(room.getId()).thenReturn(roomId);
+		when(room.getHotelId()).thenReturn(hotelId);
 
 		when(roomService.findByRoomIds(Set.of(roomId))).thenReturn(List.of(room));
+		when(hotelRepository.findAllById(Set.of(hotelId))).thenReturn(List.of(hotel));
 
 		try (MockedStatic<ConvertUtils> mockedConvertUtils = mockStatic(ConvertUtils.class)) {
 
-			mockedConvertUtils.when(() -> ConvertUtils.toBookingResponse(booking1, room)).thenReturn(bookingResponse);
+			mockedConvertUtils.when(() -> ConvertUtils.toBookingResponse(booking1, hotel, room)).thenReturn(bookingResponse);
 
 			// Act
 			List<BookingResponse> result = bookingService.forLoggedInUser(loggedInUser);
@@ -340,7 +350,7 @@ class BookingServiceTest {
 
 			verify(roomService).findByRoomIds(Set.of(roomId));
 
-			mockedConvertUtils.verify(() -> ConvertUtils.toBookingResponse(booking1, room));
+			mockedConvertUtils.verify(() -> ConvertUtils.toBookingResponse(booking1, hotel, room));
 		}
 	}
 

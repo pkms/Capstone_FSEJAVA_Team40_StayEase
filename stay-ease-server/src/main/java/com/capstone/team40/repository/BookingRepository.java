@@ -16,4 +16,6 @@ public interface BookingRepository extends JpaRepository<Booking, UUID>
     Booking findByIdAndCreatedBy(UUID id, String createdBy);
     @Query("Select b from Booking b where roomId = ?1 and b.bookingStatus = 'COMPLETED' and ((?2 >= b.checkInDate and ?2 <= b.checkOutDate) or (?3 >= b.checkInDate and ?3 <= b.checkOutDate))")
     List<Booking> findByRoomIdAndCheckInDateAndCheckOutDate(UUID roomId, LocalDateTime checkInDate, LocalDateTime checkOutDate);
+    @Query("Select b from Booking b where b.checkInDate >= ?1 and b.checkInDate <= ?2 and b.bookingStatus = 'COMPLETED' order by b.checkInDate asc")
+    List<Booking> findBookingsBetween(LocalDateTime startDateTime, LocalDateTime endDateTime);
 }

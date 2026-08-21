@@ -50,4 +50,10 @@ public class BookingController
                 ResponseEntity.badRequest().body("Booking does not exists !");
     }
 
+    @GetMapping("{days}/upcoming")
+    public ResponseEntity<List<BookingResponse>> getUpcomingBookings(@PathVariable("days") long days)
+    {
+        return ResponseEntity.ok().body(this.bookingService.getUpcomingBookings(days));
+    }
+
 }
