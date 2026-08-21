@@ -1,11 +1,13 @@
 package com.capstone.team40.service;
 
 import com.capstone.team40.entity.Booking;
+import com.capstone.team40.entity.Hotel;
 import com.capstone.team40.entity.Room;
 import com.capstone.team40.enums.BookingStatus;
 import com.capstone.team40.model.BookingResponse;
 import com.capstone.team40.model.CreateBookingRequest;
 import com.capstone.team40.repository.BookingRepository;
+import com.capstone.team40.repository.HotelRepository;
 import com.capstone.team40.utils.ConvertUtils;
 import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +30,9 @@ public class BookingService
 
     @Autowired
     private RoomService roomService;
+
+    @Autowired
+    private HotelRepository hotelRepository;
 
     public List<Booking> getBookingDetails(Set<UUID> roomIds)
     {
@@ -63,10 +68,18 @@ public class BookingService
     public List<BookingResponse> forLoggedInUser(String loggedInUser)
     {
         List<Booking> bookings = this.bookingRepository.findByCreatedBy(loggedInUser);
+        return this.getDetailedBooking(bookings);
+    }
+
+    private List<BookingResponse> getDetailedBooking(List<Booking> bookings)
+    {
         Set<UUID> roomIds = bookings.stream().map(Booking::getRoomId).collect(Collectors.toSet());
-        Map<UUID,Room> roomIdAndRoomMap = this.roomService.findByRoomIds(roomIds).stream()
+        List<Room> rooms = this.roomService.findByRoomIds(roomIds);
+        Map<UUID,Room> roomIdAndRoomMap = rooms.stream()
                 .collect(Collectors.toMap(Room::getId, Function.identity()));
-        return bookings.stream().map(booking -> ConvertUtils.toBookingResponse(booking, roomIdAndRoomMap.get(booking.getRoomId()))).collect(Collectors.toList());
+        Set<UUID> hotelIds = rooms.stream().map(Room::getHotelId).collect(Collectors.toSet());
+        Map<UUID, Hotel> hotelIdAndHotelMap = this.hotelRepository.findAllById(hotelIds).stream().collect(Collectors.toMap(Hotel::getId, Function.identity()));
+        return bookings.stream().map(booking -> ConvertUtils.toBookingResponse(booking, hotelIdAndHotelMap.get(roomIdAndRoomMap.get(booking.getRoomId()).getHotelId()), roomIdAndRoomMap.get(booking.getRoomId()))).collect(Collectors.toList());
     }
 
     public Booking cancelBooking(UUID bookingId, String userName)
@@ -78,5 +91,11 @@ public class BookingService
             this.bookingRepository.save(booking);
         }
         return booking;
+    }
+
+    public List<BookingResponse> getUpcomingBookings(long days)
+    {
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        return this.getDetailedBooking(this.bookingRepository.findBookingsBetween(currentDateTime, currentDateTime.plusDays(days)));
     }
 }

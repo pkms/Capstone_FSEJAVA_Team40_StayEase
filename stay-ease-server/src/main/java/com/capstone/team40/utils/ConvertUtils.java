@@ -31,6 +31,11 @@ public class ConvertUtils
                .collect(Collectors.toList());
     }
 
+    public static HotelResponse toHotelResponse(Hotel hotel)
+    {
+        return new HotelResponse(hotel.getId(), hotel.getName(), hotel.getCity(), hotel.getStarRating(), hotel.getDescription(), hotel.getCoverImageUrl(), hotel.getManagerId());
+    }
+
     public static List<RoomResponse> toRoomResponse(List<Room> roomList)
     {
         return roomList.stream().map(room -> new RoomResponse(room.getId(), room.getHotelId(), room.getRoomNumber(), room.getRoomType(), room.getPricePerNight(), room.getMaxOccupancy()))
@@ -61,9 +66,9 @@ public class ConvertUtils
         return booking;
     }
 
-    public static BookingResponse toBookingResponse(Booking booking, Room room)
+    public static BookingResponse toBookingResponse(Booking booking, Hotel hotel, Room room)
     {
-        return new BookingResponse(booking.getId(), toRoomResponse(room), booking.getCheckInDate(), booking.getCheckOutDate(), booking.getBookingStatus());
+        return new BookingResponse(booking.getId(), toHotelResponse(hotel), toRoomResponse(room), booking.getCheckInDate(), booking.getCheckOutDate(), booking.getBookingStatus());
     }
 
     public static Hotel toHotel(CreateHotelRequest createHotelRequest)

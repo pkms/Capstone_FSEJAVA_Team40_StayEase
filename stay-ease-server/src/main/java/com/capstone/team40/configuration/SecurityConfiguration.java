@@ -32,7 +32,7 @@ public class SecurityConfiguration
                         ).permitAll()
                         .requestMatchers("/api/hotels/create","/api/hotels/{id}/update","/api/hotels/{id}/delete","/api/users/{role}")
                         .hasAuthority("ADMIN")
-                        .requestMatchers("/api/hotels/{id}/createRoom","/api/rooms/**")
+                        .requestMatchers("/api/hotels/{id}/createRoom","/api/rooms/**","/api/bookings/{days}/upcoming")
                         .hasAuthority("MANAGER")
                         .requestMatchers("/api/hotels/all")
                         .hasAnyAuthority("ADMIN","MANAGER")
