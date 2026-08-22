@@ -37,7 +37,7 @@ public class AuthenticationController
     {
         UserResponse userResponse = this.userService.login(loginRequest);
         return  userResponse != null ?
-                ResponseEntity.ok().body(new UserLoginResponse("Bearer " + this.jwtService.generateToken(loginRequest.email()), userResponse.grantedAuthority().getAuthority())) :
+                ResponseEntity.ok().body(new UserLoginResponse("Bearer " + this.jwtService.generateToken(loginRequest.email()), userResponse.grantedAuthority().getAuthority(), userResponse.id())) :
                 ResponseEntity.badRequest().body("User does not exists in the system or password did not match");
     }
 

@@ -11,4 +11,5 @@ public interface RoomRepository extends JpaRepository<Room, UUID>
 {
     List<Room> findByHotelIdAndActive(UUID hotelId, boolean active);
     List<Room> findByIdIn(Set<UUID> uuids);
+    List<Room> findByHotelIdIn(Set<UUID> hotelIds);
 }

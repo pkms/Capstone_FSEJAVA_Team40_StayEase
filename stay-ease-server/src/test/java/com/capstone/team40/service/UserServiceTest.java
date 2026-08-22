@@ -158,6 +158,25 @@ class UserServiceTest {
 		verify(passwordEncoder).matches("wrongPassword", "encodedPassword");
 	}
 
+	@Test
+	void login_shouldReturnNull_whenUserDoesNotExist() {
+
+		// Arrange
+		when(loginRequest.email()).thenReturn("unknown@gmail.com");
+
+		when(userRepository.findByEmail("unknown@gmail.com")).thenReturn(null);
+
+		// Act
+		UserResponse result = userService.login(loginRequest);
+
+		// Assert
+		assertNull(result);
+
+		verify(userRepository).findByEmail("unknown@gmail.com");
+
+		verify(passwordEncoder, never()).matches(anyString(), anyString());
+	}
+
 	// =========================================================
 	// forEmailId() TESTS
 	// =========================================================
