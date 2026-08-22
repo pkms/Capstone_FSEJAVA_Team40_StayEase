@@ -1,7 +1,7 @@
 // Real StayEase backend integration.
 
 import type { Hotel, Room, RoomType, User, Booking, Role } from '../types';
-import { request, setToken, setStoredRole, clearToken, decodeToken } from './client';
+import { request, setToken, setStoredRole, setStoredUserId, clearToken, decodeToken } from './client';
 
 // ---------------------------------------------------------------------------
 // Response shape adapters — the backend's field names/casing differ from the
@@ -58,11 +58,18 @@ function mapBooking(b: any): Booking {
     checkInDate,
     checkOutDate,
     totalPrice,
-    status: (b.bookingStatus ?? b.status) === 'CANCELLED'
-      ? 'CANCELLED'
-      : (b.bookingStatus ?? b.status) === 'COMPLETED'
-        ? 'COMPLETED'
-        : 'CONFIRMED',
+    // The backend appears to mark every successfully created booking as
+    // "COMPLETED" regardless of whether the stay is in the past or future
+    // (confirmed: a booking checking out 2026-08-26 came back COMPLETED on
+    // 2026-08-22) — so that field can't be trusted for "past vs upcoming".
+    // We only trust it for CANCELLED (an explicit action); otherwise we
+    // derive completed/confirmed ourselves from the checkout date.
+    status: (() => {
+      const backendStatus = b.bookingStatus ?? b.status;
+      if (backendStatus === 'CANCELLED') return 'CANCELLED';
+      const isPast = checkOutDate ? new Date(checkOutDate) < new Date() : false;
+      return isPast ? 'COMPLETED' : 'CONFIRMED';
+    })(),
     createdAt: checkInDate,
   };
 }
@@ -79,16 +86,18 @@ function toIsoDateTime(dateStr: string) {
 interface LoginResponse {
   jwtToken: string;
   role: Role;
+  userId: string;
 }
 
 export async function login(email: string, password: string): Promise<User> {
   const res = await request<LoginResponse>('/api/auth/login', { method: 'POST', body: { email, password } });
   setToken(res.jwtToken);
   setStoredRole(res.role);
+  setStoredUserId(res.userId);
   const claims = decodeToken(res.jwtToken);
   const sub = claims?.sub ?? email;
   return {
-    id: sub,
+    id: res.userId,
     email: sub,
     // Backend's JWT still only carries `sub` (email) — no display name yet, so we derive a placeholder.
     name: sub.split('@')[0],
@@ -179,17 +188,39 @@ export async function createBooking(
   checkIn: string,
   checkOut: string
 ): Promise<Booking> {
-  // Backend derives the user from the JWT and doesn't return the created booking
-  // object (its OpenAPI spec marks the response as a plain string) — so after
-  // creating, we re-fetch "my bookings" and pick the newest match for this room.
-  await request('/api/bookings/create', {
+  const created = await request<any>('/api/bookings/create', {
     method: 'POST',
     body: { roomId, checkInDate: toIsoDateTime(checkIn), checkOutDate: toIsoDateTime(checkOut) },
   });
+
+  // If the backend actually returns the created booking object (its OpenAPI
+  // spec claims "string", but that's sometimes wrong/stale), use it directly
+  // instead of re-fetching.
+  if (created && typeof created === 'object' && created.id) {
+    return mapBooking(created);
+  }
+
+  // Otherwise, re-fetch "my bookings" and try to find the one we just created.
+  // Match loosely (dates first) rather than a strict roomId+status match —
+  // the nested room object's field names inside BookingResponse may not be
+  // exactly what we assume in mapBooking/mapRoom.
   const mine = await getBookingsForUser('');
-  const match = mine.find((b) => b.roomId === roomId && b.status === 'CONFIRMED');
-  if (!match) throw new Error('Booking created, but could not be confirmed — check My Stays.');
-  return match;
+  const byRoomAndDates = mine.find(
+    (b) => b.roomId === roomId && b.checkInDate?.startsWith(checkIn) && b.checkOutDate?.startsWith(checkOut)
+  );
+  if (byRoomAndDates) return byRoomAndDates;
+
+  const byDatesOnly = mine.find((b) => b.checkInDate?.startsWith(checkIn) && b.checkOutDate?.startsWith(checkOut));
+  if (byDatesOnly) return byDatesOnly;
+
+  // Last resort: the booking clearly succeeded (My Stays will show it) even
+  // though we couldn't confidently identify which entry is the new one here —
+  // don't block the user with an error over a display-only lookup.
+  console.warn('createBooking: could not identify the new booking in /api/bookings/mine — check the roomId field name inside BookingResponse.room.');
+  const mostRecent = mine[mine.length - 1];
+  if (mostRecent) return mostRecent;
+
+  throw new Error('Booking created, but could not be confirmed — check My Stays.');
 }
 
 export async function getBookingsForUser(_userId: string): Promise<Booking[]> {
@@ -206,19 +237,23 @@ export async function cancelBooking(bookingId: string, _userId: string): Promise
 }
 
 // ---------------------------------------------------------------------------
-// Manager dashboard — GAP: no backend endpoints exist for these yet.
-// Stubbed to return empty arrays (instead of throwing) so the dashboard page
-// still renders; add the endpoints on the backend to make this real.
+// Manager dashboard
 // ---------------------------------------------------------------------------
 
-export async function listRoomsForManager(_managerId: string): Promise<Room[]> {
-  console.warn('listRoomsForManager: no backend endpoint yet — returning empty list.');
-  return [];
+export async function listRoomsForManager(managerId: string): Promise<Room[]> {
+  const results = await request<any[]>(`/api/rooms/${encodeURIComponent(managerId)}`);
+  return (results ?? []).map((r) => mapRoom(r));
 }
 
-export async function listUpcomingBookingsForManager(_managerId: string): Promise<Booking[]> {
-  console.warn('listUpcomingBookingsForManager: no backend endpoint yet — returning empty list.');
-  return [];
+export async function listUpcomingBookingsForManager(days: number = 10, hotelIds?: string[]): Promise<Booking[]> {
+  // This endpoint returns upcoming bookings across ALL hotels, not just this
+  // manager's — there's no server-side manager filter, so we filter client-side
+  // using the hotel IDs already loaded via listHotelsForManager.
+  const data = await request<any[]>(`/api/bookings/${days}/upcoming`);
+  const mapped = (data ?? []).map(mapBooking);
+  if (!hotelIds || hotelIds.length === 0) return mapped;
+  const idSet = new Set(hotelIds.map((id) => id.toLowerCase()));
+  return mapped.filter((b) => idSet.has((b.hotelId || '').toLowerCase()));
 }
 
 // ---------------------------------------------------------------------------

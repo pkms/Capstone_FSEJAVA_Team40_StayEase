@@ -43,6 +43,7 @@ export const strings = {
     searchHotels: 'Search Hotels',
     cityRequired: 'City is required',
     datesRequired: 'Check-in and Check-out are required',
+    checkInPast: 'Check-in date cannot be in the past',
     checkOutAfterCheckIn: 'Check-out must be after check-in',
     placeholderCity: 'e.g. Goa',
   },

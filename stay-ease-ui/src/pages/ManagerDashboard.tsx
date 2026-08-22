@@ -5,6 +5,8 @@ import type { Hotel, Room, RoomType, Booking } from '../types';
 import { useToast } from '../contexts/ToastContext';
 import { strings } from '../constants/strings';
 
+const UPCOMING_BOOKINGS_DAYS = 10;
+
 export default function ManagerDashboard() {
   const { user } = useAuth();
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -25,9 +27,10 @@ export default function ManagerDashboard() {
     listHotelsForManager(user.id).then((managerHotels) => {
       setHotels(managerHotels);
       setSelectedHotelId(managerHotels[0]?.id ?? '');
+      const hotelIds = managerHotels.map((h) => h.id);
+      listUpcomingBookingsForManager(UPCOMING_BOOKINGS_DAYS, hotelIds).then((b) => setBookings(b));
     });
     listRoomsForManager(user.id).then((r) => setRooms(r));
-    listUpcomingBookingsForManager(user.id).then((b) => setBookings(b));
   }, [user]);
 
   if (!user) return null;
@@ -42,8 +45,12 @@ export default function ManagerDashboard() {
     if (!Number.isFinite(pricePerNight) || pricePerNight <= 0) return show(strings.manager.priceRequired, 'error');
     if (!Number.isInteger(maxOccupancy) || maxOccupancy <= 0) return show(strings.manager.occupancyRequired, 'error');
     try {
-      const createdRoom = await createRoom(selectedHotelId, { roomNumber, roomType: roomForm.roomType, pricePerNight, maxOccupancy });
-      setRooms((currentRooms) => [...currentRooms, createdRoom]);
+      // The create endpoint doesn't reliably return the created room object
+      // (it can come back as a plain string) — so instead of trusting its
+      // response, just re-fetch this manager's rooms from the server after.
+      await createRoom(selectedHotelId, { roomNumber, roomType: roomForm.roomType, pricePerNight, maxOccupancy });
+      const refreshed = await listRoomsForManager(user.id);
+      setRooms(refreshed);
       setRoomForm({ roomNumber: '', roomType: 'Double', pricePerNight: '', maxOccupancy: '' });
       show(strings.manager.roomCreated, 'success');
     } catch (err: any) {
@@ -101,15 +108,18 @@ export default function ManagerDashboard() {
       </section>
 
       <section>
-        <h3>{strings.manager.upcomingBookings}</h3>
-        <table>
-          <thead><tr><th>{strings.manager.booking}</th><th>{strings.manager.room}</th><th>{strings.manager.checkIn}</th><th>{strings.manager.checkOut}</th></tr></thead>
-          <tbody>
-            {bookings.map((b) => (
-              <tr key={b.id}><td>{b.bookingRef}</td><td>{b.roomId}</td><td>{b.checkInDate}</td><td>{b.checkOutDate}</td></tr>
-            ))}
-          </tbody>
-        </table>
+        <h3>{strings.manager.upcomingBookings} <span className="muted">(next {UPCOMING_BOOKINGS_DAYS} days)</span></h3>
+        {bookings.length === 0 && <div className="muted">No upcoming bookings in this window.</div>}
+        {bookings.length > 0 && (
+          <table>
+            <thead><tr><th>{strings.manager.booking}</th><th>{strings.manager.room}</th><th>{strings.manager.checkIn}</th><th>{strings.manager.checkOut}</th></tr></thead>
+            <tbody>
+              {bookings.map((b) => (
+                <tr key={b.id}><td>{b.bookingRef}</td><td>{b.roomNumber ?? b.roomId}</td><td>{b.checkInDate}</td><td>{b.checkOutDate}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        )}
       </section>
     </div>
   );

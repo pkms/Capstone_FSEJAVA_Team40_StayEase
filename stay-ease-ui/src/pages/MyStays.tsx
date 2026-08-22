@@ -22,13 +22,18 @@ export default function MyStays({ navigate }: { navigate: (hash: string) => void
     getBookingsForUser(user!.id).then((b) => setBookings(b)).finally(() => setLoading(false));
   }, [user]);
 
-  const doCancel = async (id: string) => {
+  const doCancel = async (booking: Booking) => {
     if (!user) return;
+    const label = booking.hotelName ?? booking.hotelId;
+    if (!confirm(`Cancel your booking at ${label}? This can't be undone.`)) return;
     try {
-      await cancelBooking(id, user.id);
-      setBookings((s) => s.map((bk) => (bk.id === id ? { ...bk, status: 'CANCELLED' } : bk)));
+      await cancelBooking(booking.id, user.id);
+      setBookings((s) => s.map((bk) => (bk.id === booking.id ? { ...bk, status: 'CANCELLED' } : bk)));
+      show('Booking cancelled', 'info');
     } catch (e: any) {
-      setError(e.message || strings.myStays.cancelFailed);
+      const message = e.message || strings.myStays.cancelFailed;
+      setError(message);
+      show(message, 'error');
     }
   };
 
@@ -52,7 +57,7 @@ export default function MyStays({ navigate }: { navigate: (hash: string) => void
               <td>{b.checkOutDate?.split('T')[0]}</td>
               <td>₹{b.totalPrice}</td>
               <td><span className={`status-badge ${b.status.toLowerCase()}`}>{b.status}</span></td>
-              <td>{b.status === 'CONFIRMED' && <button className="small-button" onClick={() => doCancel(b.id)}>{strings.myStays.cancel}</button>}</td>
+              <td>{b.status === 'CONFIRMED' && <button className="small-button" onClick={() => doCancel(b)}>{strings.myStays.cancel}</button>}</td>
             </tr>
           ))}
         </tbody>

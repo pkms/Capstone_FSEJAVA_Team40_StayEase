@@ -1,6 +1,6 @@
 import { createContext, useContext, useState } from 'react';
 import * as api from '../api/mockApi';
-import { getToken, getStoredRole, clearToken, decodeToken } from '../api/client';
+import { getToken, getStoredRole, getStoredUserId, clearToken, decodeToken } from '../api/client';
 import type { User, Role } from '../types';
 
 interface AuthContextValue {
@@ -14,17 +14,18 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 // Rebuilds a minimal User from whatever's already in storage, so a page refresh
-// doesn't log the user out. The JWT itself only carries the email — role is
-// stored separately (set at login time) since the backend returns it alongside
-// the token rather than inside it. `name` is still a placeholder derived from
-// the email, since the backend doesn't return a display name on login.
+// doesn't log the user out. The JWT itself only carries the email — role and
+// userId are stored separately (set at login time) since the backend returns
+// them alongside the token rather than inside it. `name` is still a placeholder
+// derived from the email, since the backend doesn't return a display name on login.
 function userFromStoredToken(): User | null {
   const token = getToken();
   if (!token) return null;
   const claims = decodeToken(token);
   if (!claims?.sub) return null;
   const role = (getStoredRole() as Role) ?? 'GUEST';
-  return { id: claims.sub, email: claims.sub, name: claims.sub.split('@')[0], role };
+  const id = getStoredUserId() ?? claims.sub;
+  return { id, email: claims.sub, name: claims.sub.split('@')[0], role };
 }
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
