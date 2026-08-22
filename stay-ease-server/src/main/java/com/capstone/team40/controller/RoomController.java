@@ -1,12 +1,14 @@
 package com.capstone.team40.controller;
 
 import com.capstone.team40.entity.Room;
+import com.capstone.team40.model.RoomResponse;
 import com.capstone.team40.model.UpdateRoomRequest;
 import com.capstone.team40.service.RoomService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -35,5 +37,11 @@ public class RoomController
     {
         Room toggledRoom = this.roomService.toggleStatus(uuid, active);
         return toggledRoom == null ? ResponseEntity.badRequest().body("Room with given Id does not exists !") : ResponseEntity.ok().body("Room status toggled successfully !");
+    }
+
+    @GetMapping("/{managerId}")
+    public ResponseEntity<List<RoomResponse>> getRooms(@PathVariable("managerId") UUID managerId)
+    {
+        return ResponseEntity.ok().body(this.roomService.getRooms(managerId));
     }
 }

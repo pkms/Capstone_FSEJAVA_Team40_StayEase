@@ -330,6 +330,7 @@ class BookingServiceTest {
 
 		when(room.getId()).thenReturn(roomId);
 		when(room.getHotelId()).thenReturn(hotelId);
+		when(hotel.getId()).thenReturn(hotelId);
 
 		when(roomService.findByRoomIds(Set.of(roomId))).thenReturn(List.of(room));
 		when(hotelRepository.findAllById(Set.of(hotelId))).thenReturn(List.of(hotel));
@@ -349,6 +350,8 @@ class BookingServiceTest {
 			verify(bookingRepository).findByCreatedBy(loggedInUser);
 
 			verify(roomService).findByRoomIds(Set.of(roomId));
+
+			verify(hotelRepository).findAllById(Set.of(hotelId));
 
 			mockedConvertUtils.verify(() -> ConvertUtils.toBookingResponse(booking1, hotel, room));
 		}

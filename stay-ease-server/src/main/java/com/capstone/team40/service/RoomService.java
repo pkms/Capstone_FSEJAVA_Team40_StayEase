@@ -1,20 +1,28 @@
 package com.capstone.team40.service;
 
+import com.capstone.team40.entity.Hotel;
 import com.capstone.team40.entity.Room;
+import com.capstone.team40.model.RoomResponse;
 import com.capstone.team40.model.UpdateRoomRequest;
+import com.capstone.team40.repository.HotelRepository;
 import com.capstone.team40.repository.RoomRepository;
+import com.capstone.team40.utils.ConvertUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Component
 public class RoomService
 {
     @Autowired
     private RoomRepository roomRepository;
+
+    @Autowired
+    private HotelRepository hotelRepository;
 
     public List<Room> findActiveRoomsInHotel(UUID id)
     {
@@ -63,6 +71,12 @@ public class RoomService
             roomToToggle = this.roomRepository.save(roomToToggle);
         }
         return roomToToggle;
+    }
+
+    public List<RoomResponse> getRooms(UUID managerId)
+    {
+        Set<UUID> hotelIds = this.hotelRepository.findByManagerId(managerId).stream().map(Hotel::getId).collect(Collectors.toSet());
+        return ConvertUtils.toRoomResponse(this.roomRepository.findByHotelIdIn(hotelIds));
     }
 
 }

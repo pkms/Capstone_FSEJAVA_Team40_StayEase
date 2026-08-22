@@ -164,8 +164,6 @@ class UserServiceTest {
 		// Arrange
 		when(loginRequest.email()).thenReturn("unknown@gmail.com");
 
-		when(loginRequest.password()).thenReturn("password");
-
 		when(userRepository.findByEmail("unknown@gmail.com")).thenReturn(null);
 
 		// Act
