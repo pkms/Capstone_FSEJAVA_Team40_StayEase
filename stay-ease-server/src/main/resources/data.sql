@@ -1,6 +1,10 @@
 INSERT INTO USERS(ID,EMAIL,PASSWORD_HASH,ROLE,NAME,CREATED_AT)
 VALUES (RANDOM_UUID(),'admin@stayease.com','$2a$10$U1E/jEt3fvDiv3SNeyPLVuthzVU.G8qQoL3dXabaE0CZkNd0GMpZe','ADMIN','Admin',CURRENT_TIMESTAMP()),
 (RANDOM_UUID(),'mgr1@stayease.com','$2a$10$U1E/jEt3fvDiv3SNeyPLVuthzVU.G8qQoL3dXabaE0CZkNd0GMpZe','MANAGER','Hotel Manager',CURRENT_TIMESTAMP()),
+(RANDOM_UUID(),'mgr2@stayease.com','$2a$10$U1E/jEt3fvDiv3SNeyPLVuthzVU.G8qQoL3dXabaE0CZkNd0GMpZe','MANAGER','Hotel Manager2',CURRENT_TIMESTAMP()),
+(RANDOM_UUID(),'mgr3@stayease.com','$2a$10$U1E/jEt3fvDiv3SNeyPLVuthzVU.G8qQoL3dXabaE0CZkNd0GMpZe','MANAGER','Hotel Manager3',CURRENT_TIMESTAMP()),
+(RANDOM_UUID(),'mgr4@stayease.com','$2a$10$U1E/jEt3fvDiv3SNeyPLVuthzVU.G8qQoL3dXabaE0CZkNd0GMpZe','MANAGER','Hotel Manager4',CURRENT_TIMESTAMP()),
+(RANDOM_UUID(),'mgr5@stayease.com','$2a$10$U1E/jEt3fvDiv3SNeyPLVuthzVU.G8qQoL3dXabaE0CZkNd0GMpZe','MANAGER','Hotel Manager5',CURRENT_TIMESTAMP()),
 (RANDOM_UUID(),'guest1@stayease.com','$2a$10$U1E/jEt3fvDiv3SNeyPLVuthzVU.G8qQoL3dXabaE0CZkNd0GMpZe','GUEST','Rohit Verma',CURRENT_TIMESTAMP());
 
 

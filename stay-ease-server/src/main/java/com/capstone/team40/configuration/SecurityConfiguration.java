@@ -26,7 +26,8 @@ public class SecurityConfiguration
     // Allows the Vite dev server (localhost:5173) to call this API from the browser.
     // Add any other frontend origins (e.g. a deployed URL) to allowedOrigins later.
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
+    public CorsConfigurationSource corsConfigurationSource()
+    {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowedOriginPatterns(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
@@ -56,7 +57,7 @@ public class SecurityConfiguration
                         ).permitAll()
                         .requestMatchers("/api/hotels/create","/api/hotels/{id}/update","/api/hotels/{id}/delete")
                         .hasAuthority("ADMIN")
-                        .requestMatchers("/api/hotels/{id}/createRoom","/api/rooms/**","/api/bookings/{days}/upcoming")
+                        .requestMatchers("/api/hotels/{hotelId}/createRoom","/api/rooms/**","/api/bookings/{days}/upcoming")
                         .hasAuthority("MANAGER")
                         .requestMatchers("/api/hotels/all","/api/users/{role}")
                         .hasAnyAuthority("ADMIN","MANAGER")
