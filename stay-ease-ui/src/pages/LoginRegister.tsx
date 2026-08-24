@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useToast } from '../contexts/ToastContext';
 import { strings } from '../constants/strings';
+import { getStoredRole } from '../api/client';
 
 export default function LoginRegister({ navigate }: { navigate: (hash: string) => void }) {
   const { login, register } = useAuth();
@@ -50,7 +51,8 @@ export default function LoginRegister({ navigate }: { navigate: (hash: string) =
         const dest = decodeURIComponent(redirect);
         navigate(dest);
       } else {
-        navigate('#/');
+        const role = getStoredRole();
+        navigate(role === 'MANAGER' ? '#/manager' : role === 'ADMIN' ? '#/admin' : '#/');
       }
     } catch (e: any) {
       setError(e.message || strings.auth.authFailed);

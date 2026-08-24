@@ -53,8 +53,11 @@ function mapBooking(b: any): Booking {
     userId: '', // not returned by /api/bookings/mine; backend identifies the user via the JWT instead
     hotelId: room.hotelId ?? hotel.hotelId ?? hotel.id ?? b.hotelId ?? '',
     hotelName: hotel.name ?? b.hotelName,
+    hotelCity: hotel.city,
     roomId: room.roomId ?? b.roomId ?? '',
     roomNumber: room.roomNumber !== undefined ? String(room.roomNumber) : (b.roomNumber !== undefined ? String(b.roomNumber) : undefined),
+    roomType: room.roomType,
+    pricePerNight: room.pricePerNight !== undefined ? Number(room.pricePerNight) : undefined,
     checkInDate,
     checkOutDate,
     totalPrice,

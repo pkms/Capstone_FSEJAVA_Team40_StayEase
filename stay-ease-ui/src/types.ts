@@ -39,8 +39,11 @@ export interface Booking {
   userId: string;
   hotelId: string;
   hotelName?: string;
+  hotelCity?: string;
   roomId: string;
   roomNumber?: string;
+  roomType?: RoomType;
+  pricePerNight?: number;
   checkInDate: string; // ISO
   checkOutDate: string; // ISO
   totalPrice: number;

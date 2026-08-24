@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { strings } from '../constants/strings';
+import { CITY_OPTIONS } from '../constants/cities';
 
 interface Props {
   onSearch: (city: string, checkIn: string, checkOut: string) => void;
@@ -45,7 +46,10 @@ export default function SearchForm({ onSearch, initialCity = '', initialCheckIn 
       <div className="row">
         <label>
           <span className="field-label">{strings.search.destination}</span>
-          <input value={city} onChange={(e) => setCity(e.target.value)} placeholder={strings.search.placeholderCity} />
+          <select value={city} onChange={(e) => setCity(e.target.value)} required>
+            <option value="">{strings.search.placeholderCity}</option>
+            {CITY_OPTIONS.map((availableCity) => <option key={availableCity} value={availableCity}>{availableCity}</option>)}
+          </select>
         </label>
         <label>
           <span className="field-label">{strings.search.checkIn}</span>

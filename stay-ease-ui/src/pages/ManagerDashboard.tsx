@@ -12,6 +12,7 @@ export default function ManagerDashboard() {
   const [rooms, setRooms] = useState<Room[]>([]);
   const [hotels, setHotels] = useState<Hotel[]>([]);
   const [selectedHotelId, setSelectedHotelId] = useState('');
+  const [roomFilterHotelId, setRoomFilterHotelId] = useState('');
   const [roomForm, setRoomForm] = useState({ roomNumber: '', roomType: 'Double' as RoomType, pricePerNight: '', maxOccupancy: '' });
   const [bookings, setBookings] = useState<Booking[]>([]);
   const { show } = useToast();
@@ -27,6 +28,7 @@ export default function ManagerDashboard() {
     listHotelsForManager(user.id).then((managerHotels) => {
       setHotels(managerHotels);
       setSelectedHotelId(managerHotels[0]?.id ?? '');
+      setRoomFilterHotelId(managerHotels[0]?.id ?? '');
       const hotelIds = managerHotels.map((h) => h.id);
       listUpcomingBookingsForManager(UPCOMING_BOOKINGS_DAYS, hotelIds).then((b) => setBookings(b));
     });
@@ -57,6 +59,8 @@ export default function ManagerDashboard() {
       show(err?.message || strings.manager.roomCreateFailed, 'error');
     }
   };
+
+  const selectedHotelRooms = rooms.filter((room) => room.hotelId === roomFilterHotelId);
 
   return (
     <div className="page manager card">
@@ -96,11 +100,18 @@ export default function ManagerDashboard() {
         </form>
       </section>
       <section>
-        <h3>{strings.manager.myRooms}</h3>
+        <h3>{strings.manager.availableRooms}</h3>
+        <div className="form-row">
+          <label>{strings.manager.hotels}</label>
+          <select value={roomFilterHotelId} onChange={(e) => setRoomFilterHotelId(e.target.value)} required>
+            <option value="">{strings.manager.selectHotel}</option>
+            {hotels.map((hotel) => <option key={hotel.id} value={hotel.id}>{hotel.name} ({hotel.city})</option>)}
+          </select>
+        </div>
         <table>
           <thead><tr><th>{strings.manager.number}</th><th>{strings.manager.type}</th><th>{strings.manager.price}</th><th>{strings.manager.active}</th></tr></thead>
           <tbody>
-            {rooms.map((r) => (
+            {selectedHotelRooms.map((r) => (
               <tr key={r.id}><td>{r.roomNumber}</td><td>{r.roomType}</td><td>₹{r.pricePerNight}</td><td>{r.isActive ? strings.manager.yes : strings.manager.no}</td></tr>
             ))}
           </tbody>
@@ -112,10 +123,20 @@ export default function ManagerDashboard() {
         {bookings.length === 0 && <div className="muted">No upcoming bookings in this window.</div>}
         {bookings.length > 0 && (
           <table>
-            <thead><tr><th>{strings.manager.booking}</th><th>{strings.manager.room}</th><th>{strings.manager.checkIn}</th><th>{strings.manager.checkOut}</th></tr></thead>
+            <thead><tr><th>{strings.manager.booking}</th><th>{strings.manager.hotel}</th><th>{strings.manager.city}</th><th>{strings.manager.room}</th><th>{strings.manager.roomType}</th><th>{strings.manager.pricePerNight}</th><th>{strings.manager.checkIn}</th><th>{strings.manager.checkOut}</th><th>{strings.manager.status}</th></tr></thead>
             <tbody>
               {bookings.map((b) => (
-                <tr key={b.id}><td>{b.bookingRef}</td><td>{b.roomNumber ?? b.roomId}</td><td>{b.checkInDate}</td><td>{b.checkOutDate}</td></tr>
+                <tr key={b.id}>
+                  <td>{b.bookingRef}</td>
+                  <td>{b.hotelName ?? '-'}</td>
+                  <td>{b.hotelCity ?? '-'}</td>
+                  <td>{b.roomNumber ?? '-'}</td>
+                  <td>{b.roomType ?? '-'}</td>
+                  <td>{b.pricePerNight !== undefined ? `₹${b.pricePerNight}` : '-'}</td>
+                  <td>{b.checkInDate?.split('T')[0]}</td>
+                  <td>{b.checkOutDate?.split('T')[0]}</td>
+                  <td>{b.status}</td>
+                </tr>
               ))}
             </tbody>
           </table>
