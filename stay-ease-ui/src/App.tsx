@@ -20,8 +20,10 @@ function NavBar({ navigate }: { navigate: (hash: string) => void }) {
     <header className="nav">
       <div className="brand" onClick={() => navigate('#/')}>{strings.app.brand}</div>
       <nav>
-        <button className="link-button" onClick={() => navigate('#/')}>{strings.nav.home}</button>
-        <button className="link-button" onClick={() => navigate('#/mystays')}>{strings.nav.myStays}</button>
+        {user?.role === 'GUEST' && <>
+          <button className="link-button" onClick={() => navigate('#/')}>{strings.nav.home}</button>
+          <button className="link-button" onClick={() => navigate('#/mystays')}>{strings.nav.myStays}</button>
+        </>}
         {user?.role === 'MANAGER' && <button className="link-button" onClick={() => navigate('#/manager')}>{strings.nav.manager}</button>}
         {user?.role === 'ADMIN' && <button className="link-button" onClick={() => navigate('#/admin')}>{strings.nav.admin}</button>}
       </nav>
@@ -29,14 +31,21 @@ function NavBar({ navigate }: { navigate: (hash: string) => void }) {
         {user ? (
           <>
             <span className="muted">{user.name}</span>
-            <button className="small-button" onClick={() => { logout(); show(strings.auth.loggedOut, 'info'); navigate('#/'); }}>{strings.nav.logout}</button>
+            <button className="small-button" onClick={() => { logout(); show(strings.auth.loggedOut, 'info'); navigate('#/login'); }}>{strings.nav.logout}</button>
           </>
         ) : (
           <button className="primary-button" onClick={() => navigate('#/login')}>{strings.nav.loginRegister}</button>
         )}
+
       </div>
     </header>
   );
+}
+
+function landingRoute(role?: string) {
+  if (role === 'MANAGER') return '#/manager';
+  if (role === 'ADMIN') return '#/admin';
+  return '#/';
 }
 
 function RouterView({ navigate, tick }: { navigate: (hash: string) => void; tick: number }) {
@@ -75,22 +84,25 @@ function RouterView({ navigate, tick }: { navigate: (hash: string) => void; tick
   return <Home navigate={navigate} />;
 }
 
-function AppContent() {
-  const [tick, setTick] = useState(0);
+function AppShell() {
+  const { user } = useAuth();
+  const [tick, setTick] = useState(() => {
+    const hash = window.location.hash;
+    if (!hash || hash === '#/') window.location.hash = user ? landingRoute(user.role) : '#/login';
+    return 0;
+  });
   const navigate = (hash: string) => { window.location.hash = hash; setTick((t) => t + 1); };
 
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <NavBar navigate={navigate} />
-        <main className="app-shell">
-          <RouterView navigate={navigate} tick={tick} />
-        </main>
-      </ToastProvider>
-    </AuthProvider>
+    <ToastProvider>
+      <NavBar navigate={navigate} />
+      <main className="app-shell">
+        <RouterView navigate={navigate} tick={tick} />
+      </main>
+    </ToastProvider>
   );
 }
 
 export default function App() {
-  return <AppContent />;
+  return <AuthProvider><AppShell /></AuthProvider>;
 }

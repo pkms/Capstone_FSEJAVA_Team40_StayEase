@@ -42,7 +42,7 @@ public class BookingController
     }
 
     @PutMapping("/{id}/cancel")
-    public ResponseEntity<String> cancelBooking(@RequestParam("id") UUID bookingId)
+    public ResponseEntity<String> cancelBooking(@PathVariable("id") UUID bookingId)
     {
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
         Booking booking = this.bookingService.cancelBooking(bookingId, userName);

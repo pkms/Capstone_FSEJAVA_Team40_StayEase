@@ -31,14 +31,19 @@ export interface Room {
   isActive: boolean;
 }
 
-export type BookingStatus = 'CONFIRMED' | 'CANCELLED';
+export type BookingStatus = 'CONFIRMED' | 'COMPLETED' | 'CANCELLED';
 
 export interface Booking {
   id: string;
   bookingRef: string;
   userId: string;
   hotelId: string;
+  hotelName?: string;
+  hotelCity?: string;
   roomId: string;
+  roomNumber?: string;
+  roomType?: RoomType;
+  pricePerNight?: number;
   checkInDate: string; // ISO
   checkOutDate: string; // ISO
   totalPrice: number;

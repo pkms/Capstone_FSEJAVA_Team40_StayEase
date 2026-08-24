@@ -380,6 +380,7 @@ input:focus-visible{
 }
 .status-badge.confirmed{ background:var(--teal-100); color:var(--teal-dark); }
 .status-badge.cancelled{ background:#FBEAE8; color:var(--danger); }
+.status-badge.completed{ background:#EFEAE0; color:var(--ink-soft); }
 
 /* ---------- Generic tables (Admin / Manager) ---------- */
 .page table{

@@ -1,181 +1,334 @@
-import type { Hotel, Room, User, Booking } from '../types';
-function genId() { return 'id-' + Math.random().toString(36).slice(2, 9); }
+// Real StayEase backend integration.
 
-// Simple in-memory seed data inspired by the PDF
-const users: User[] = [
-  { id: 'u-admin', email: 'admin@stayease.com', name: 'Admin', role: 'ADMIN' },
-  { id: 'u-mgr1', email: 'mgr1@stayease.com', name: 'Hotel Mgr', role: 'MANAGER' },
-  { id: 'u-guest1', email: 'guest1@stayease.com', name: 'Rohit Verma', role: 'GUEST' },
-];
+import type { Hotel, Room, RoomType, User, Booking, Role } from '../types';
+import { request, setToken, setStoredRole, setStoredUserId, clearToken, decodeToken } from './client';
 
-const hotels: Hotel[] = [
-  {
-    id: 'h-sunset',
-    name: 'Sunset Palms',
-    city: 'Goa',
-    starRating: 4,
-    description: 'Beachfront resort with pool',
-    coverImageUrl: 'https://picsum.photos/seed/hotel1/800/360',
-    managerId: 'u-mgr1',
-  },
-  {
-    id: 'h-city',
-    name: 'City Inn',
-    city: 'Goa',
-    starRating: 3,
-    description: 'Budget-friendly city centre hotel',
-    coverImageUrl: 'https://picsum.photos/seed/hotel2/800/360',
-    managerId: 'u-mgr1',
-  },
-];
+// ---------------------------------------------------------------------------
+// Response shape adapters — the backend's field names/casing differ from the
+// frontend's `types.ts` (e.g. `hotelId` vs `id`), so we normalize here.
+// ---------------------------------------------------------------------------
 
-const rooms: Room[] = [
-  { id: 'r-101-s', hotelId: 'h-sunset', roomNumber: '101', roomType: 'Double', pricePerNight: 3500, maxOccupancy: 2, isActive: true },
-  { id: 'r-201-s', hotelId: 'h-sunset', roomNumber: '201', roomType: 'Suite', pricePerNight: 7000, maxOccupancy: 3, isActive: true },
-  { id: 'r-101-c', hotelId: 'h-city', roomNumber: '101', roomType: 'Single', pricePerNight: 1500, maxOccupancy: 1, isActive: true },
-];
-
-let bookings: Booking[] = [];
-
-function delay<T>(ms = 300, value?: T): Promise<T> {
-  return new Promise((res) => setTimeout(() => res(value as T), ms));
-}
-
-export async function register(email: string, _password: string, name: string) {
-  // password ignored for mock
-  const exists = users.find((u) => u.email === email.toLowerCase());
-  if (exists) throw new Error('Email already registered');
-  const user: User = { id: genId(), email: email.toLowerCase(), name, role: 'GUEST' };
-  users.push(user);
-  return delay(200, user);
-}
-
-export async function login(email: string, _password: string) {
-  // password ignored for mock
-  const user = users.find((u) => u.email === email.toLowerCase());
-  if (!user) throw new Error('Invalid credentials');
-  return delay(200, user);
-}
-
-export async function searchHotels(city: string) {
-  const results = hotels.filter((h) => h.city.toLowerCase().includes(city.trim().toLowerCase()));
-  return delay(200, results);
-}
-
-export async function getHotelById(id: string) {
-  const h = hotels.find((x) => x.id === id);
-  if (!h) throw new Error('Hotel not found');
-  return delay(150, h);
-}
-
-// Returns rooms for hotel that are active and not booked for overlapping dates
-export async function getAvailableRooms(hotelId: string, checkIn: string, checkOut: string) {
-  const checkInDate = new Date(checkIn);
-  const checkOutDate = new Date(checkOut);
-
-  const roomList = rooms.filter((r) => r.hotelId === hotelId && r.isActive);
-
-  const available = roomList.filter((r) => {
-    const overlapping = bookings.find((b) => b.roomId === r.id && b.status !== 'CANCELLED' && (new Date(b.checkInDate) < checkOutDate) && (new Date(b.checkOutDate) > checkInDate));
-    return !overlapping;
-  });
-  return delay(200, available);
-}
-
-export async function createBooking(userId: string, hotelId: string, roomId: string, checkIn: string, checkOut: string) {
-  const nights = Math.round((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24));
-  if (nights <= 0) throw new Error('Check-out must be after check-in');
-  const room = rooms.find((r) => r.id === roomId);
-  if (!room) throw new Error('Room not found');
-  // check availability again
-  const overlapping = bookings.find((b) => b.roomId === room.id && b.status !== 'CANCELLED' && (new Date(b.checkInDate) < new Date(checkOut)) && (new Date(b.checkOutDate) > new Date(checkIn)));
-  if (overlapping) throw new Error('Room not available for selected dates');
-
-  const totalPrice = nights * room.pricePerNight;
-  const booking = {
-    id: genId(),
-    bookingRef: 'BK-' + Math.random().toString(36).slice(2, 9).toUpperCase(),
-    userId,
-    hotelId,
-    roomId,
-    checkInDate: checkIn,
-    checkOutDate: checkOut,
-    totalPrice,
-    status: 'CONFIRMED' as const,
-    createdAt: new Date().toISOString(),
+function mapHotel(h: any): Hotel {
+  return {
+    id: h.hotelId ?? h.id,
+    name: h.name,
+    city: h.city,
+    starRating: h.starRating,
+    description: h.description,
+    coverImageUrl: h.coverImageUrl,
+    managerId: h.managerId,
   };
-  bookings.push(booking);
-  return delay(300, booking);
 }
 
-export async function getBookingsForUser(userId: string) {
-  const b = bookings.filter((bk) => bk.userId === userId);
-  return delay(150, b);
+function mapRoom(r: any, fallbackHotelId?: string): Room {
+  return {
+    id: r.roomId,
+    hotelId: r.hotelId ?? fallbackHotelId ?? '',
+    roomNumber: String(r.roomNumber),
+    roomType: r.roomType,
+    pricePerNight: r.pricePerNight,
+    maxOccupancy: r.maxOccupancy,
+    description: r.description,
+    imageUrl: r.imageUrl,
+    isActive: r.isActive ?? true,
+  };
 }
 
-export async function cancelBooking(bookingId: string, userId: string) {
-  const idx = bookings.findIndex((b) => b.id === bookingId && b.userId === userId);
-  if (idx === -1) throw new Error('Booking not found');
-  bookings[idx] = { ...bookings[idx], status: 'CANCELLED' };
-  return delay(150, bookings[idx]);
+function mapBooking(b: any): Booking {
+  const room = b.room ?? {};
+  const hotel = room.hotel ?? b.hotel ?? {};
+  const checkInDate = b.checkInDate;
+  const checkOutDate = b.checkOutDate;
+  const nights = Math.max(
+    0,
+    Math.ceil((new Date(checkOutDate).getTime() - new Date(checkInDate).getTime()) / (1000 * 60 * 60 * 24))
+  );
+  const totalPrice = room.pricePerNight !== undefined
+    ? Number(room.pricePerNight) * nights
+    : (b.totalPrice ?? 0);
+  return {
+    id: b.id,
+    // Backend doesn't return a separate booking reference — reuse the id.
+    bookingRef: b.id,
+    userId: '', // not returned by /api/bookings/mine; backend identifies the user via the JWT instead
+    hotelId: room.hotelId ?? hotel.hotelId ?? hotel.id ?? b.hotelId ?? '',
+    hotelName: hotel.name ?? b.hotelName,
+    hotelCity: hotel.city,
+    roomId: room.roomId ?? b.roomId ?? '',
+    roomNumber: room.roomNumber !== undefined ? String(room.roomNumber) : (b.roomNumber !== undefined ? String(b.roomNumber) : undefined),
+    roomType: room.roomType,
+    pricePerNight: room.pricePerNight !== undefined ? Number(room.pricePerNight) : undefined,
+    checkInDate,
+    checkOutDate,
+    totalPrice,
+    // The backend appears to mark every successfully created booking as
+    // "COMPLETED" regardless of whether the stay is in the past or future
+    // (confirmed: a booking checking out 2026-08-26 came back COMPLETED on
+    // 2026-08-22) — so that field can't be trusted for "past vs upcoming".
+    // We only trust it for CANCELLED (an explicit action); otherwise we
+    // derive completed/confirmed ourselves from the checkout date.
+    status: (() => {
+      const backendStatus = b.bookingStatus ?? b.status;
+      if (backendStatus === 'CANCELLED') return 'CANCELLED';
+      const isPast = checkOutDate ? new Date(checkOutDate) < new Date() : false;
+      return isPast ? 'COMPLETED' : 'CONFIRMED';
+    })(),
+    createdAt: checkInDate,
+  };
 }
 
-export async function listRoomsForManager(managerId: string) {
-  const managedHotels = hotels.filter((h) => h.managerId === managerId).map((h) => h.id);
-  const myRooms = rooms.filter((r) => managedHotels.includes(r.hotelId));
-  return delay(150, myRooms);
+// <input type="date"> gives "YYYY-MM-DD"; the backend expects a full ISO date-time.
+function toIsoDateTime(dateStr: string) {
+  return `${dateStr}T00:00:00`;
 }
 
-export async function listUpcomingBookingsForManager(managerId: string) {
-  const managedHotelIds = hotels.filter((h) => h.managerId === managerId).map((h) => h.id);
-  const now = new Date();
-  const upcoming = bookings.filter((b) => managedHotelIds.includes(b.hotelId) && new Date(b.checkOutDate) >= now && b.status !== 'CANCELLED');
-  return delay(150, upcoming);
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
+
+interface LoginResponse {
+  jwtToken: string;
+  role: Role;
+  userId: string;
 }
 
-export async function listUsers() {
-  return delay(150, users.slice());
+export async function login(email: string, password: string): Promise<User> {
+  const res = await request<LoginResponse>('/api/auth/login', { method: 'POST', body: { email, password } });
+  setToken(res.jwtToken);
+  setStoredRole(res.role);
+  setStoredUserId(res.userId);
+  const claims = decodeToken(res.jwtToken);
+  const sub = claims?.sub ?? email;
+  return {
+    id: res.userId,
+    email: sub,
+    // Backend's JWT still only carries `sub` (email) — no display name yet, so we derive a placeholder.
+    name: sub.split('@')[0],
+    // Role now comes from the login response body.
+    role: res.role,
+  };
 }
 
-export async function getAllBookings() {
-  return delay(150, bookings.slice());
+export async function register(email: string, password: string, name: string): Promise<User> {
+  await request('/api/auth/register', { method: 'POST', body: { email, name, password } });
+  // Registration doesn't return a token — log the new user in immediately after.
+  const user = await login(email, password);
+  // We DO know the real name here (the user just typed it), unlike on a plain login.
+  return { ...user, name };
 }
 
-export async function listAllHotels() {
-  return delay(150, hotels.map((h) => ({ ...h })));
+export function logoutLocal() {
+  clearToken();
 }
 
-export async function createHotel(payload: Partial<Hotel>) {
-  if (!payload.name || !payload.city) throw new Error('Name and city are required');
-  const h: Hotel = {
-    id: genId(),
+// ---------------------------------------------------------------------------
+// Hotels (guest-facing)
+// ---------------------------------------------------------------------------
+
+// In-memory cache so getHotelById can work as long as the hotel was seen via
+// searchHotels earlier in this session — see gap note below.
+const hotelCache = new Map<string, Hotel>();
+
+export async function searchHotels(city: string): Promise<Hotel[]> {
+  const results = await request<any[]>('/api/hotels', { query: { city } });
+  const mapped = results.map(mapHotel);
+  mapped.forEach((h) => hotelCache.set(h.id, h));
+  return mapped;
+}
+
+export async function getHotelById(id: string): Promise<Hotel> {
+  const cached = hotelCache.get(id);
+  if (cached) return cached;
+  // GAP: backend has no GET /api/hotels/{id}. This only works if the hotel was
+  // already loaded via searchHotels this session (e.g. came from the list page).
+  // Add a single-hotel endpoint on the backend to fix direct links/refreshes.
+  throw new Error('Hotel details unavailable — ask a hotel list first, or add GET /api/hotels/{id} on the backend.');
+}
+
+export async function getAvailableRooms(hotelId: string, checkInDate: string, checkOutDate: string): Promise<Room[]> {
+  const data = await request<any>(`/api/hotels/${encodeURIComponent(hotelId)}/availableRooms`, {
+    query: { checkInDate: toIsoDateTime(checkInDate), checkOutDate: toIsoDateTime(checkOutDate) },
+  });
+  const list = Array.isArray(data) ? data : (data?.rooms ?? []);
+  return list.map((r: any) => mapRoom(r, hotelId));
+}
+
+export async function listHotelsForManager(managerId: string): Promise<Hotel[]> {
+  const [results, managers] = await Promise.all([
+    request<any[]>('/api/hotels/all'),
+    listUsers('MANAGER'),
+  ]);
+  const manager = managers.find((candidate) =>
+    candidate.id === managerId || candidate.email.toLowerCase() === managerId.toLowerCase()
+  );
+  const assignedManagerId = manager?.id ?? managerId;
+  const mapped = results
+    .map(mapHotel)
+    .filter((hotel) => hotel.managerId?.toLowerCase() === assignedManagerId.toLowerCase());
+  mapped.forEach((hotel) => hotelCache.set(hotel.id, hotel));
+  return mapped;
+}
+
+export async function createRoom(
+  hotelId: string,
+  payload: { roomNumber: number; roomType: RoomType; pricePerNight: number; maxOccupancy: number }
+): Promise<Room> {
+  const response = await request<any>(`/api/hotels/${encodeURIComponent(hotelId)}/createRoom`, {
+    method: 'POST',
+    body: payload,
+  });
+  return mapRoom(response, hotelId);
+}
+
+// ---------------------------------------------------------------------------
+// Bookings (guest-facing)
+// ---------------------------------------------------------------------------
+
+export async function createBooking(
+  _userId: string,
+  _hotelId: string,
+  roomId: string,
+  checkIn: string,
+  checkOut: string
+): Promise<Booking> {
+  const created = await request<any>('/api/bookings/create', {
+    method: 'POST',
+    body: { roomId, checkInDate: toIsoDateTime(checkIn), checkOutDate: toIsoDateTime(checkOut) },
+  });
+
+  // If the backend actually returns the created booking object (its OpenAPI
+  // spec claims "string", but that's sometimes wrong/stale), use it directly
+  // instead of re-fetching.
+  if (created && typeof created === 'object' && created.id) {
+    return mapBooking(created);
+  }
+
+  // Otherwise, re-fetch "my bookings" and try to find the one we just created.
+  // Match loosely (dates first) rather than a strict roomId+status match —
+  // the nested room object's field names inside BookingResponse may not be
+  // exactly what we assume in mapBooking/mapRoom.
+  const mine = await getBookingsForUser('');
+  const byRoomAndDates = mine.find(
+    (b) => b.roomId === roomId && b.checkInDate?.startsWith(checkIn) && b.checkOutDate?.startsWith(checkOut)
+  );
+  if (byRoomAndDates) return byRoomAndDates;
+
+  const byDatesOnly = mine.find((b) => b.checkInDate?.startsWith(checkIn) && b.checkOutDate?.startsWith(checkOut));
+  if (byDatesOnly) return byDatesOnly;
+
+  // Last resort: the booking clearly succeeded (My Stays will show it) even
+  // though we couldn't confidently identify which entry is the new one here —
+  // don't block the user with an error over a display-only lookup.
+  console.warn('createBooking: could not identify the new booking in /api/bookings/mine — check the roomId field name inside BookingResponse.room.');
+  const mostRecent = mine[mine.length - 1];
+  if (mostRecent) return mostRecent;
+
+  throw new Error('Booking created, but could not be confirmed — check My Stays.');
+}
+
+export async function getBookingsForUser(_userId: string): Promise<Booking[]> {
+  const data = await request<any[]>('/api/bookings/mine');
+  return data.map(mapBooking);
+}
+
+export async function cancelBooking(bookingId: string, _userId: string): Promise<Booking> {
+  await request(`/api/bookings/${bookingId}/cancel`, { method: 'PUT' });
+  const mine = await getBookingsForUser('');
+  const updated = mine.find((b) => b.id === bookingId);
+  if (!updated) throw new Error('Booking cancelled, but could not refresh its status.');
+  return updated;
+}
+
+// ---------------------------------------------------------------------------
+// Manager dashboard
+// ---------------------------------------------------------------------------
+
+export async function listRoomsForManager(managerId: string): Promise<Room[]> {
+  const results = await request<any[]>(`/api/rooms/${encodeURIComponent(managerId)}`);
+  return (results ?? []).map((r) => mapRoom(r));
+}
+
+export async function listUpcomingBookingsForManager(days: number = 10, hotelIds?: string[]): Promise<Booking[]> {
+  // This endpoint returns upcoming bookings across ALL hotels, not just this
+  // manager's — there's no server-side manager filter, so we filter client-side
+  // using the hotel IDs already loaded via listHotelsForManager.
+  const data = await request<any[]>(`/api/bookings/${days}/upcoming`);
+  const mapped = (data ?? []).map(mapBooking);
+  if (!hotelIds || hotelIds.length === 0) return mapped;
+  const idSet = new Set(hotelIds.map((id) => id.toLowerCase()));
+  return mapped.filter((b) => idSet.has((b.hotelId || '').toLowerCase()));
+}
+
+// ---------------------------------------------------------------------------
+// Admin dashboard
+// ---------------------------------------------------------------------------
+
+interface BackendUser {
+  email: string;
+  grantedAuthority?: { authority?: string };
+  id: string;
+  name: string;
+}
+
+export async function listUsers(role?: Role): Promise<User[]> {
+  const path = role ? `/api/users/${encodeURIComponent(role)}` : '/api/users';
+  const users = await request<BackendUser[]>(path);
+  return users.map((backendUser) => ({
+    id: backendUser.id,
+    email: backendUser.email,
+    name: backendUser.name,
+    role: role ?? (backendUser.grantedAuthority?.authority?.replace(/^ROLE_/, '') as Role) ?? 'GUEST',
+  }));
+}
+
+export async function getAllBookings(): Promise<Booking[]> {
+  console.warn('getAllBookings: no backend endpoint yet — returning empty list.');
+  return [];
+}
+
+export async function listAllHotels(): Promise<Hotel[]> {
+  try {
+    // GET /api/hotels requires a non-empty `city` per its spec — an empty string
+    // may be rejected. If so, this falls back to an empty list; ask backend for
+    // a proper "list all hotels" (no city filter) endpoint for Admin use.
+    const results = await request<any[]>('/api/hotels/all');
+    return results.map(mapHotel);
+  } catch {
+    console.warn('listAllHotels: backend requires a city filter — Admin hotel list may be incomplete.');
+    return [];
+  }
+}
+
+export async function createHotel(payload: Partial<Hotel>): Promise<Hotel> {
+  const body = {
     name: payload.name,
     city: payload.city,
-    starRating: payload.starRating ?? 3,
+    starRating: payload.starRating,
     description: payload.description,
     coverImageUrl: payload.coverImageUrl,
     managerId: payload.managerId,
   };
-  hotels.push(h);
-  return delay(150, h);
+  // Response is a plain string, not the created hotel — AdminDashboard already
+  // re-fetches the hotel list right after calling this, so that's fine.
+  await request('/api/hotels/create', { method: 'POST', body });
+  return body as unknown as Hotel;
 }
 
-export async function updateHotel(id: string, payload: Partial<Hotel>) {
-  const idx = hotels.findIndex((x) => x.id === id);
-  if (idx === -1) throw new Error('Hotel not found');
-  hotels[idx] = { ...hotels[idx], ...payload } as Hotel;
-  return delay(150, hotels[idx]);
+export async function updateHotel(id: string, payload: Partial<Hotel>): Promise<Hotel> {
+  const body = {
+    name: payload.name,
+    city: payload.city,
+    description: payload.description,
+    coverImageUrl: payload.coverImageUrl,
+    managerId: payload.managerId,
+  };
+  await request(`/api/hotels/${id}/update`, { method: 'PUT', body });
+  return { id, ...body } as unknown as Hotel;
 }
 
-export async function deleteHotel(id: string) {
-  const idx = hotels.findIndex((x) => x.id === id);
-  if (idx === -1) throw new Error('Hotel not found');
-  // also remove rooms for that hotel
-  for (let i = rooms.length - 1; i >= 0; i--) {
-    if (rooms[i].hotelId === id) rooms.splice(i, 1);
-  }
-  hotels.splice(idx, 1);
-  return delay(150, true);
+export async function deleteHotel(id: string): Promise<boolean> {
+  await request(`/api/hotels/${id}/delete`, { method: 'DELETE' });
+  return true;
 }
 
 // minimal export for UI
@@ -185,6 +338,8 @@ export default {
   searchHotels,
   getHotelById,
   getAvailableRooms,
+  listHotelsForManager,
+  createRoom,
   createBooking,
   getBookingsForUser,
   cancelBooking,
