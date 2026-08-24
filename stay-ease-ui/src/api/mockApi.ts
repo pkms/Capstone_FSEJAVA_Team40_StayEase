@@ -30,7 +30,7 @@ function mapRoom(r: any, fallbackHotelId?: string): Room {
     maxOccupancy: r.maxOccupancy,
     description: r.description,
     imageUrl: r.imageUrl,
-    isActive: r.isActive ?? true,
+    isActive: r.active ?? r.isActive ?? true,
   };
 }
 
@@ -180,6 +180,32 @@ export async function createRoom(
   return mapRoom(response, hotelId);
 }
 
+export async function updateRoom(
+  roomId: string,
+  payload: { roomNumber: number; roomType: RoomType; pricePerNight: number; maxOccupancy: number }
+): Promise<void> {
+  // Like createRoom, the update endpoint's response is documented as a plain
+  // string rather than the updated room — callers should re-fetch rooms
+  // (e.g. via listRoomsForManager) after this resolves.
+  await request(`/api/rooms/${encodeURIComponent(roomId)}/update`, {
+    method: 'PUT',
+    body: payload,
+  });
+}
+
+export async function toggleRoomStatus(roomId: string, active: boolean): Promise<void> {
+  await request(`/api/rooms/${encodeURIComponent(roomId)}/status`, {
+    method: 'PATCH',
+    query: { active },
+  });
+}
+
+export async function deleteRoom(roomId: string): Promise<void> {
+  await request(`/api/rooms/${encodeURIComponent(roomId)}/delete`, {
+    method: 'DELETE',
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Bookings (guest-facing)
 // ---------------------------------------------------------------------------
@@ -318,6 +344,7 @@ export async function updateHotel(id: string, payload: Partial<Hotel>): Promise<
   const body = {
     name: payload.name,
     city: payload.city,
+    starRating: payload.starRating,
     description: payload.description,
     coverImageUrl: payload.coverImageUrl,
     managerId: payload.managerId,
@@ -340,6 +367,9 @@ export default {
   getAvailableRooms,
   listHotelsForManager,
   createRoom,
+  updateRoom,
+  toggleRoomStatus,
+  deleteRoom,
   createBooking,
   getBookingsForUser,
   cancelBooking,
