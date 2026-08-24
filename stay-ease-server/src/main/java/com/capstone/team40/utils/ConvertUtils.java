@@ -38,13 +38,13 @@ public class ConvertUtils
 
     public static List<RoomResponse> toRoomResponse(List<Room> roomList)
     {
-        return roomList.stream().map(room -> new RoomResponse(room.getId(), room.getHotelId(), room.getRoomNumber(), room.getRoomType(), room.getPricePerNight(), room.getMaxOccupancy()))
+        return roomList.stream().map(room -> new RoomResponse(room.getId(), room.getHotelId(), room.getRoomNumber(), room.getRoomType(), room.getPricePerNight(), room.getMaxOccupancy(), room.isActive()))
                 .collect(Collectors.toList());
     }
 
     public static RoomResponse toRoomResponse(Room room)
     {
-        return new RoomResponse(room.getId(), room.getHotelId(), room.getRoomNumber(), room.getRoomType(), room.getPricePerNight(), room.getMaxOccupancy());
+        return new RoomResponse(room.getId(), room.getHotelId(), room.getRoomNumber(), room.getRoomType(), room.getPricePerNight(), room.getMaxOccupancy(), room.isActive());
     }
 
     public static UserResponse toUserResponse(User user)
