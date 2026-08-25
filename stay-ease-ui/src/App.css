@@ -90,6 +90,32 @@
 }
 .small-button:hover{ background: var(--teal-dark); color:#fff; transform: translateY(-1px); }
 
+.status-toggle{
+  position:relative;
+  display:inline-flex;
+  align-items:center;
+  width:42px;
+  height:24px;
+  padding:3px;
+  border:1.5px solid var(--ink-soft);
+  border-radius:999px;
+  background:var(--line);
+  cursor:pointer;
+  transition:background .15s ease, border-color .15s ease;
+}
+.status-toggle.is-active{ border-color:var(--teal-dark); background:var(--teal-dark); }
+.status-toggle-thumb{
+  display:block;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:#fff;
+  transition:transform .15s ease;
+}
+.status-toggle.is-active .status-toggle-thumb{ transform:translateX(16px); }
+.status-toggle:focus-visible{ outline:2px solid var(--gold); outline-offset:2px; }
+.status-toggle:disabled{ cursor:not-allowed; opacity:.55; }
+
 .primary-button{
   background: var(--teal-dark);
   color:#fff;

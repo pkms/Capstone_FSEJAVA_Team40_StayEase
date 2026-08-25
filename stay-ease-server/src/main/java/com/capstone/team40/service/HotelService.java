@@ -66,6 +66,7 @@ public class HotelService
         {
             hotelToUpdate.setName(updateHotelRequest.name());
             hotelToUpdate.setCity(updateHotelRequest.city());
+            hotelToUpdate.setStarRating(updateHotelRequest.starRating());
             hotelToUpdate.setDescription(updateHotelRequest.description());
             hotelToUpdate.setCoverImageUrl(updateHotelRequest.coverImageUrl());
             hotelToUpdate = this.hotelRepository.save(hotelToUpdate);
