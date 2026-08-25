@@ -76,9 +76,9 @@ public class HotelController
     }
 
     @PostMapping("/{hotelId}/createRoom")
-    public ResponseEntity<String> createHotelRoom(@PathVariable("hotelId") UUID id, @RequestBody CreateRoomRequest createRoomRequest)
+    public ResponseEntity<String> createHotelRoom(@PathVariable("hotelId") UUID hotelId, @RequestBody CreateRoomRequest createRoomRequest)
     {
-        Room room = this.hotelService.createRoomInHotel(id, createRoomRequest);
+        Room room = this.hotelService.createRoomInHotel(hotelId, createRoomRequest);
         return room == null ? ResponseEntity.badRequest().body("Hotel with given Id does not exists !") : ResponseEntity.ok().body("Room successfully added in Hotel and Room ID is - "+room.getId());
     }
 
