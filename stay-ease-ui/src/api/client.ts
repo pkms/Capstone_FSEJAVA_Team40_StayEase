@@ -63,7 +63,7 @@ export class ApiError extends Error {
 interface RequestOptions {
   method?: string;
   body?: unknown;
-  query?: Record<string, string | undefined>;
+  query?: Record<string, string | number | boolean | undefined>;
 }
 
 export async function request<T>(path: string, opts: RequestOptions = {}): Promise<T> {
