@@ -13,7 +13,6 @@ This README describes how to build, configure, run and test the stay-ease-server
 - Project Structure
 - Quickstart (Local)
 - Configuration
-- Running with Docker
 - Database migrations
 - Test
 - API overview
@@ -35,8 +34,8 @@ The stay-ease-server module is the Java/Spring Boot backend for the StayEase hot
 
 ## Technology Stack
 
-- Java 11+ (or the project's configured Java version)
-- Spring Boot
+- Java 17
+- Spring Boot - 3.4.6
 - Spring Data JPA (or equivalent)
 - Maven (or Gradle if the module uses it)
 - PostgreSQL / MySQL (configure according to your environment)
@@ -44,7 +43,7 @@ The stay-ease-server module is the Java/Spring Boot backend for the StayEase hot
 
 ## Prerequisites
 
-- JDK 11 or newer installed and JAVA_HOME configured
+- JDK 17 and JAVA_HOME configured
 - Maven 3.6+ (or Gradle if used)
 - Docker & Docker Compose (optional, for containerized runs)
 - A running relational database (Postgres recommended)
@@ -59,26 +58,26 @@ The recommended project structure for the stay-ease-server module follows standa
   - src/
     - main/
       - java/
-        - com/yourorg/stayease/ (base package)
-          - config/ — Spring configuration classes (security, CORS, Swagger)
+        - com/capstone/team40/ (base package)
+          - annotation/ — custom annotations (if any)
+          - configuration/ — Spring configuration classes (security, CORS, Swagger)
           - controller/ — REST controllers (API endpoints)
-          - service/ — service layer containing business logic
+          - entity/ — JPA entity classes
+          - enums/ — enum types used in the domain
+          - filter/ — request/response filters (e.g., JWT filter)
+          - handler/ — exception handlers (e.g., @ControllerAdvice)
+          - model/ — domain models (if separate from entities)
           - repository/ — Spring Data JPA repositories
-          - model/ or entity/ — JPA entity classes
-          - dto/ — request/response DTOs
-          - security/ — authentication/authorization (JWT filters, providers)
-          - exception/ — custom exceptions and handlers (e.g., @ControllerAdvice)
-          - util/ — utility classes and helpers
+          - service/ — service layer containing business logic
+          - utils/ — utility classes and helpers
+          - validator/ - custom validators (if any)
+          
       - resources/
         - application.yml / application.properties — default configuration
-        - application-dev.yml, application-prod.yml — profile-specific configs
-        - db/migration/ (if using Flyway) or db/changelog/ (Liquibase)
-        - static/ and templates/ (if needed)
+        - data.sql /  — optional SQL scripts for initial data
     - test/
       - java/ — unit and integration tests
   - README.md
-  - .env.example — example environment variables (optional)
-  - docker-compose.yml — example compose for local dev (optional)
 
 Notes
 - If the repo uses modules or a different packaging style, adapt the layout accordingly.
@@ -95,15 +94,11 @@ Notes
 
 3. Build the project:
 
-   mvn clean package
+   mvn clean install
 
 4. Run the application:
 
-   mvn spring-boot:run
-
-   Or run the packaged jar:
-
-   java -jar target/*.jar
+   Open StayEaseApplication.java and run it from your IDE.
 
 5. By default the server will start on port 8080 (adjust via application properties).
 
@@ -122,49 +117,11 @@ Common configuration items:
 
 Example environment variables for local development:
 
-- DB_URL=jdbc:postgresql://localhost:5432/stayease
-- DB_USER=stayease
-- DB_PASS=stayeasepass
-- SPRING_PROFILES_ACTIVE=dev
+- DB_URL=jdbc:h2:mem:testdb
+- DB_USER=sa
+- DB_PASS=password
 
 You can also supply these via application.yml or a `.env` file when using Docker Compose.
-
-## Running with Docker
-
-A simple Docker setup (example `docker-compose.yml`) might include the app and a Postgres service:
-
-```yaml
-version: '3.8'
-services:
-  db:
-    image: postgres:15
-    environment:
-      - POSTGRES_DB=stayease
-      - POSTGRES_USER=stayease
-      - POSTGRES_PASSWORD=stayeasepass
-    ports:
-      - "5432:5432"
-    volumes:
-      - db-data:/var/lib/postgresql/data
-
-  stayease:
-    build: .
-    ports:
-      - "8080:8080"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/stayease
-      - SPRING_DATASOURCE_USERNAME=stayease
-      - SPRING_DATASOURCE_PASSWORD=stayeasepass
-    depends_on:
-      - db
-
-volumes:
-  db-data:
-```
-
-To build and run the stack:
-
-  docker-compose up --build
 
 ## Database migrations
 
