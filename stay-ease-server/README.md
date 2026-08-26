@@ -10,6 +10,7 @@ This README describes how to build, configure, run and test the stay-ease-server
 - Key Features
 - Technology Stack
 - Prerequisites
+- Project Structure
 - Quickstart (Local)
 - Configuration
 - Running with Docker
@@ -47,6 +48,41 @@ The stay-ease-server module is the Java/Spring Boot backend for the StayEase hot
 - Maven 3.6+ (or Gradle if used)
 - Docker & Docker Compose (optional, for containerized runs)
 - A running relational database (Postgres recommended)
+
+## Project Structure
+
+The recommended project structure for the stay-ease-server module follows standard Spring Boot conventions. Adjust package names to match the project's base package.
+
+- stay-ease-server/
+  - pom.xml (or build.gradle) — build file
+  - Dockerfile — optional container image build instructions
+  - src/
+    - main/
+      - java/
+        - com/yourorg/stayease/ (base package)
+          - config/ — Spring configuration classes (security, CORS, Swagger)
+          - controller/ — REST controllers (API endpoints)
+          - service/ — service layer containing business logic
+          - repository/ — Spring Data JPA repositories
+          - model/ or entity/ — JPA entity classes
+          - dto/ — request/response DTOs
+          - security/ — authentication/authorization (JWT filters, providers)
+          - exception/ — custom exceptions and handlers (e.g., @ControllerAdvice)
+          - util/ — utility classes and helpers
+      - resources/
+        - application.yml / application.properties — default configuration
+        - application-dev.yml, application-prod.yml — profile-specific configs
+        - db/migration/ (if using Flyway) or db/changelog/ (Liquibase)
+        - static/ and templates/ (if needed)
+    - test/
+      - java/ — unit and integration tests
+  - README.md
+  - .env.example — example environment variables (optional)
+  - docker-compose.yml — example compose for local dev (optional)
+
+Notes
+- If the repo uses modules or a different packaging style, adapt the layout accordingly.
+- If you use a layered package structure (api, core, persistence), include a short description in this section.
 
 ## Quickstart (Local)
 
