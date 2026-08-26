@@ -45,9 +45,9 @@ public class HotelService
                 .stream().collect(Collectors.groupingBy(Booking::getRoomId));
 
         List<Room> availableRooms = roomIdAndRoomMap.entrySet().stream().filter(uuidRoomEntry -> !(bookingsPerRoom.containsKey(uuidRoomEntry.getKey()))
-                || bookingsPerRoom.get(uuidRoomEntry.getKey()).stream().filter(booking -> (checkInDate.isAfter(booking.getCheckInDate()) &&
-                checkInDate.isBefore(booking.getCheckOutDate())) || (checkOutDate.isAfter(booking.getCheckInDate()) &&
-                checkOutDate.isBefore(booking.getCheckOutDate()))).findFirst().isEmpty())
+                || bookingsPerRoom.get(uuidRoomEntry.getKey()).stream().filter(booking -> (checkInDate.compareTo(booking.getCheckInDate()) >= 0 &&
+                checkInDate.compareTo(booking.getCheckOutDate()) <= 0) || (checkOutDate.compareTo(booking.getCheckInDate()) >= 0 &&
+                checkOutDate.compareTo(booking.getCheckOutDate()) <= 0)).findFirst().isEmpty())
                 .map(Map.Entry::getValue)
                 .collect(Collectors.toList());
 
