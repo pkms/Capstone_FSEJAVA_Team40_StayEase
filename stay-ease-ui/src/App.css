@@ -274,9 +274,9 @@ input:focus-visible{
   border:1px solid var(--line);
   border-radius:var(--radius);
   box-shadow: var(--shadow-card);
-  margin-bottom:14px;
   overflow:visible;
   transition: box-shadow .2s ease, transform .2s ease;
+  margin-bottom:12px;
 }
 .room-card:hover{ box-shadow: var(--shadow-card-hover); transform: translateY(-2px); }
 
@@ -288,7 +288,7 @@ input:focus-visible{
 
 /* ---------- Misc / shared page bits ---------- */
 .cover{ height:220px; background-size:cover; background-position:center; border-radius: var(--radius); margin-bottom:12px; }
-.rooms-grid{ display:flex; flex-direction:column; }
+.rooms-grid{ display:flex; flex-direction:column; gap:12px; }
 .page h2{ font-family:var(--font-display); margin-top:0; color:var(--ink); }
 
 .stays-table{ width:100%; border-collapse:collapse; background:var(--card); border-radius:var(--radius); overflow:hidden; box-shadow: var(--shadow-card); }
